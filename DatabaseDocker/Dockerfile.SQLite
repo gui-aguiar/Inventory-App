@@ -1,0 +1,19 @@
+FROM alpine:3.17
+
+RUN apk add --no-cache sqlite
+
+RUN mkdir -p /data
+
+WORKDIR /scripts
+
+COPY create-database.sql populate-database.sql ./
+
+# Executar os scripts diretamente durante o build
+RUN sqlite3 /data/inventory.db ".read create-database.sql" && \
+    sqlite3 /data/inventory.db ".read populate-database.sql"
+
+# Expõe o banco em um volume
+VOLUME /data
+
+# Comando principal: manter o contêiner rodando
+CMD ["tail", "-f", "/dev/null"]

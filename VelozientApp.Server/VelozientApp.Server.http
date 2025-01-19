@@ -1,0 +1,6 @@
+@VelozientApp.Server_HostAddress = http://localhost:5019
+
+GET {{VelozientApp.Server_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
