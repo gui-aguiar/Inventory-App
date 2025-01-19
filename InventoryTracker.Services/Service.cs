@@ -1,4 +1,5 @@
 ﻿using InventoryTracker.Contracts;
+using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -15,7 +16,7 @@ namespace InventoryTracker.Services
 
         public virtual async Task<IEnumerable<T>> GetAllAsync()
         {
-            return await _repository.GetAllAsync();
+            return await _repository.GetAll().ToListAsync();
         }
 
         public virtual async Task<T?> GetByIdAsync(int id)
@@ -30,6 +31,8 @@ namespace InventoryTracker.Services
 
         public virtual async Task UpdateAsync(T entity)
         {
+            // hashcode amigo?ai complica, como isso funciona? 
+            // se olho isso aqui, devo olhar na subclasse?
             var existingEntity = await _repository.GetByIdAsync(entity.GetHashCode());
             if (existingEntity == null)
                 throw new KeyNotFoundException($"{typeof(T).Name} not found");

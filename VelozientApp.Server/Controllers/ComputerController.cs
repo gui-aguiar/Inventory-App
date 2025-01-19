@@ -1,16 +1,17 @@
 ﻿using InventoryTracker.Contracts;
+using InventoryTracker.Interfaces;
 using InventoryTracker.Models;
 using Microsoft.AspNetCore.Mvc;
 
-namespace InventoryTracker.API.Controllers
+namespace InventoryTracker.Server.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
     public class ComputerController : ControllerBase
     {
-        private readonly IService<Computer> _computerService;
+        private readonly IComputerService _computerService;
 
-        public ComputerController(IService<Computer> computerService)
+        public ComputerController(IComputerService computerService)
         {
             _computerService = computerService;
         }
@@ -55,5 +56,60 @@ namespace InventoryTracker.API.Controllers
             await _computerService.DeleteAsync(id);
             return NoContent();
         }
+
+        [HttpPost("{id}/change-status")]
+        public async Task<IActionResult> ChangeStatus(int id, [FromBody] ChangeStatusRequest request)
+        {
+            try
+            {
+                await _computerService.ChangeStatusAsync(id, request.StatusId);
+                return NoContent();
+            }
+
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { Error = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Error = "An unexpected error occurred.", Details = ex.Message });
+            }
+        }
+
+        [HttpPut("{computerId}/assign-user")]
+        public async Task<IActionResult> AssignUserToComputer(int computerId, [FromBody] AssignUserRequest request)
+        {
+            if (request == null || request.UserId <= 0)
+            {
+                return BadRequest("Invalid request payload.");
+            }
+
+            try
+            {
+                await _computerService.AssignUserAsync(computerId, request.UserId);
+                return NoContent(); // Indicating the action was successful
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message); // For invalid inputs
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(ex.Message); // For logical inconsistencies
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "An unexpected error occurred: " + ex.Message);
+            }
+        }
+    }
+    public class ChangeStatusRequest
+    {
+        public int StatusId { get; set; }
+    }
+
+    public class AssignUserRequest
+    {
+        public int UserId { get; set; }
     }
 }

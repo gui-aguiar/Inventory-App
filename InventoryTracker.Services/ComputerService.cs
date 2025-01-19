@@ -1,25 +1,32 @@
 ﻿using InventoryTracker.Contracts;
+using InventoryTracker.Interfaces;
 using InventoryTracker.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace InventoryTracker.Services
 {
-    public class ComputerService : Service<Computer>
+    public class ComputerService : Service<Computer>, IComputerService
     {
         private readonly IRepository<ComputerManufacturer> _manufacturerRepository;
-        private readonly IRepository<ComputerStatus> _statusRepository;
+        private readonly IComputerStatusService _statusService;
+        private readonly IComputerUserService _userService;
+
         public ComputerService(
             IRepository<Computer> repository,
             IRepository<ComputerManufacturer> manufacturerRepository,
-            IRepository<ComputerStatus> statusRepository
+            IComputerStatusService statusService,
+            IComputerUserService userService
         ) : base(repository)
         {
             _manufacturerRepository = manufacturerRepository;
-            _statusRepository = statusRepository;
+            _statusService = statusService;
+            _userService = userService;
         }
 
         public override async Task AddAsync(Computer computer)
         {
             await ValidateComputerAsync(computer);
+            _statusService.AssignNewStatus(computer, (int)Status.New);
             await base.AddAsync(computer);
         }
 
@@ -29,31 +36,102 @@ namespace InventoryTracker.Services
             await base.UpdateAsync(computer);
         }
 
+        public async Task ChangeStatusAsync(int computerId, int newStatusId)
+        {
+            var computer = await GetComputerOrThrowAsync(computerId);
+
+            ValidateStatusChange(computer, newStatusId);
+            UnassignUserIfNeeded(computer, newStatusId);
+
+            _statusService.AssignNewStatus(computer, newStatusId);
+
+            await _repository.UpdateAsync(computer);
+        }
+
+        public async Task AssignUserAsync(int computerId, int userId)
+        {
+            var computer = await GetComputerOrThrowAsync(computerId);
+            var user = await _userService.GetUserOrThrowAsync(userId);
+
+            EnsureCanAssignUser(computer);
+
+            FinalizeCurrentUserAssignment(computer);
+            _userService.AssignNewUser(computer, user);
+
+            _statusService.AssignNewStatus(computer, (int)Status.InUse);
+
+            await _repository.UpdateAsync(computer);
+        }
+
+        // ----------- Private Helper Methods -----------
+
         private async Task ValidateComputerAsync(Computer computer)
+        {
+            ValidateRequiredFields(computer);
+            await EnsureUniqueSerialNumberAsync(computer.SerialNumber);
+            await EnsureValidManufacturerAsync(computer.ComputerManufacturerId);
+            ValidateSerialNumberFormat(computer);
+            ValidateDates(computer);
+        }
+
+        private void EnsureCanAssignUser(Computer computer)
+        {
+            var currentStatus = _statusService.GetCurrentStatusAsync(computer).Result;
+
+            if (currentStatus != Status.Available && currentStatus != Status.New)
+            {
+                throw new InvalidOperationException($"Cannot assign a user to a computer in the status '{currentStatus}'.");
+            }
+        }
+
+        private async Task<Computer> GetComputerOrThrowAsync(int computerId)
+        {
+            var computer = await _repository.GetByIdAsync(computerId);
+            return computer ?? throw new ArgumentException($"Computer with ID '{computerId}' not found.");
+        }
+
+        private async Task EnsureUniqueSerialNumberAsync(string serialNumber)
+        {
+            if (await _repository.GetAll().AnyAsync(c => c.SerialNumber == serialNumber))
+            {
+                throw new ArgumentException($"Serial number '{serialNumber}' must be unique.");
+            }
+        }
+
+        private async Task EnsureValidManufacturerAsync(int manufacturerId)
+        {
+            if (await _manufacturerRepository.GetByIdAsync(manufacturerId) == null)
+            {
+                throw new ArgumentException($"Manufacturer ID '{manufacturerId}' is invalid.");
+            }
+        }
+
+        private void ValidateRequiredFields(Computer computer)
         {
             if (string.IsNullOrWhiteSpace(computer.SerialNumber) ||
                 string.IsNullOrWhiteSpace(computer.Specifications) ||
-                computer.ComputerManufacturerId == null)
+                computer.ComputerManufacturerId <= 0)
             {
                 throw new ArgumentException("All required fields must be filled.");
             }
+        }
 
-            if (!await IsSerialNumberUniqueAsync(computer.SerialNumber))
+        private void ValidateSerialNumberFormat(Computer computer)
+        {
+            var manufacturer = _manufacturerRepository.GetByIdAsync(computer.ComputerManufacturerId).Result;
+            if (manufacturer == null || string.IsNullOrWhiteSpace(manufacturer.SerialRegex))
             {
-                throw new ArgumentException("Serial number must be unique.");
+                throw new ArgumentException("Invalid manufacturer or missing serial number format.");
             }
 
-            if (!await IsManufacturerValidAsync(computer.ComputerManufacturerId))
+            if (!System.Text.RegularExpressions.Regex.IsMatch(computer.SerialNumber, manufacturer.SerialRegex))
             {
-                throw new ArgumentException("Invalid manufacturer.");
+                throw new ArgumentException($"Invalid serial number for manufacturer '{manufacturer.Name}'.");
             }
+        }
 
-            var manufacturer = await _manufacturerRepository.GetByIdAsync(computer.ComputerManufacturerId);
-            if (!ValidateSerialNumber(computer, manufacturer))
-            {
-                throw new ArgumentException($"Invalid serial number for manufacturer {manufacturer.Name}.");
-            }
-
+        private void ValidateDates(Computer computer)
+        {
             if (computer.PurchaseDate > DateTime.UtcNow)
             {
                 throw new ArgumentException("Purchase date cannot be in the future.");
@@ -63,64 +141,43 @@ namespace InventoryTracker.Services
             {
                 throw new ArgumentException("Warranty expiry date must be after the purchase date.");
             }
+        }
 
-            if (!await IsStatusValidAsync(computer))
+        private void ValidateStatusChange(Computer computer, int newStatusId)
+        {
+            var currentStatus = _statusService.GetCurrentStatusAsync(computer).Result;
+
+            if (currentStatus == (Status)newStatusId)
             {
-                throw new ArgumentException("Invalid status.");
-            }
-        }
-
-        public async Task<bool> IsSerialNumberUniqueAsync(string serialNumber)
-        {
-            var existingComputer = await _repository.GetAllAsync()
-                .FirstOrDefaultAsync(c => c.SerialNumber == serialNumber);
-            return existingComputer == null;
-        }
-
-        private async Task<bool> IsManufacturerValidAsync(int manufacturerId)
-        {
-            var manufacturer = await _manufacturerRepository.GetByIdAsync(manufacturerId);
-            return manufacturer != null;
-        }
-
-        private bool ValidateSerialNumber(Computer computer, ComputerManufacturer manufacturer)
-        {
-            var regex = manufacturer.SerialRegex;
-            if (string.IsNullOrWhiteSpace(regex))
-            {
-                throw new ArgumentException($"No serial number pattern defined for manufacturer {manufacturer.Name}.");
+                throw new InvalidOperationException($"The computer is already in the status '{currentStatus}'.");
             }
 
-            return System.Text.RegularExpressions.Regex.IsMatch(computer.SerialNumber, regex);
-        }
-        public async Task<bool> IsStatusValidAsync(int statusId)
-        {
-            if (!Enum.IsDefined(typeof(Status), statusId))
+            if ((Status)newStatusId == Status.New)
             {
-                return false;
+                throw new InvalidOperationException("Cannot set status back to 'New'.");
             }
 
-            var status = await _statusRepository.GetByIdAsync(statusId);  // add aqui as validacoes de status
-            return status != null;
+            if ((Status)newStatusId == Status.InUse)
+            {
+                throw new InvalidOperationException("Status 'In Use' can only be set via user assignment.");
+            }
+
+            _statusService.ValidateStatusTransition(currentStatus, (Status)newStatusId);
         }
 
-        private void ValidateStatusTransition(Status currentStatus, Status newStatus)
+        private void UnassignUserIfNeeded(Computer computer, int newStatusId)
         {
-            if (currentStatus == newStatus)           
-                return;
-
-            var validTransitions = new Dictionary<Status, List<Status>>
+            if ((Status)newStatusId is Status.Available or Status.InMaintenance or Status.Retired)
             {
-                { Status.New, new List<Status> { Status.InUse } },
-                { Status.InUse, new List<Status> { Status.Available, Status.InMaintenance, Status.Retired } },
-                { Status.Available, new List<Status> { Status.InUse, Status.Retired } },
-                { Status.InMaintenance, new List<Status> { Status.Available, Status.Retired } },
-                { Status.Retired, new List<Status>() }
-            };
-
-            if (!validTransitions[currentStatus].Contains(newStatus))
+                FinalizeCurrentUserAssignment(computer);
+            }
+        }
+        private void FinalizeCurrentUserAssignment(Computer computer)
+        {
+            var currentAssignment = computer.Users.FirstOrDefault(u => u.AssignEndDate == null);
+            if (currentAssignment != null)
             {
-                throw new InvalidOperationException($"Invalid status transition from {currentStatus} to {newStatus}");
+                currentAssignment.AssignEndDate = DateTime.UtcNow;
             }
         }
     }

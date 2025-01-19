@@ -1,7 +1,6 @@
 ﻿using InventoryTracker.Contracts;
 using InventoryTracker.Database;
 using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
 using System.Linq.Expressions;
 
 namespace InventoryTracker.Repositories
@@ -21,19 +20,19 @@ namespace InventoryTracker.Repositories
             _dbSet = _context.Set<T>();
         }
 
-        public async Task<T?> GetByIdAsync(int id)  // pq esse ?
+        public async Task<T?> GetByIdAsync(int id)
         {
             return await _dbSet.FindAsync(id);
         }
 
-        public async Task<IEnumerable<T>> GetAllAsync()
+        public IQueryable<T> GetAll()
         {
-            return await _dbSet.ToListAsync();
+            return _dbSet.AsQueryable();
         }
 
-        public async Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> predicate)
+        public IQueryable<T> Find(Expression<Func<T, bool>> predicate)
         {
-            return await _dbSet.Where(predicate).ToListAsync(); // esse metodo aqui talvez eu remova 
+            return _dbSet.Where(predicate);
         }
 
         public async Task AddAsync(T entity)

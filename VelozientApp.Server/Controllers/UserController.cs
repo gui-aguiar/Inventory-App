@@ -1,6 +1,7 @@
 ﻿using InventoryTracker.Contracts;
 using InventoryTracker.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace InventoryTracker.Server.Controllers
 {
@@ -22,7 +23,7 @@ namespace InventoryTracker.Server.Controllers
         [HttpGet]
         public async Task<IActionResult> Get()
         {
-            var users = await _userRepository.GetAllAsync();
+            var users = await _userRepository.GetAll().ToListAsync();
             return Ok(users);
         }
     }
