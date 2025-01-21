@@ -14,9 +14,17 @@ namespace InventoryTracker.Services
             _repository = repository;
         }
 
-        public virtual async Task<IEnumerable<T>> GetAllAsync()
+        public virtual async Task<IEnumerable<T>> GetAllAsync(int offset, int limit)
         {
-            return await _repository.GetAll().ToListAsync();
+            return await _repository.GetAll()
+                .Skip(offset)
+                .Take(limit)
+                .ToListAsync();
+        }
+
+        public async Task<int> GetTotalCountAsync()
+        {
+            return await _repository.GetAll().CountAsync();
         }
 
         public virtual async Task<T?> GetByIdAsync(int id)

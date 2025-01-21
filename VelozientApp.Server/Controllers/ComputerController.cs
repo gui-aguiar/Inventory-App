@@ -17,9 +17,9 @@ namespace InventoryTracker.Server.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAll([FromQuery] int offset = 0, [FromQuery] int limit = 10)
         {
-            var computers = await _computerService.GetAllAsync();
+            var computers = await _computerService.GetAllAsync(offset, limit);
             return Ok(computers);
         }
 

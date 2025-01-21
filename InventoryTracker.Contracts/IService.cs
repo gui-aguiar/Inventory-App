@@ -5,7 +5,7 @@ namespace InventoryTracker.Contracts
 {
     public interface IService<T> where T : class
     {
-        Task<IEnumerable<T>> GetAllAsync();
+        Task<IEnumerable<T>> GetAllAsync(int offset, int limit);
         Task<T?> GetByIdAsync(int id);
         Task AddAsync(T entity);
         Task UpdateAsync(T entity);
