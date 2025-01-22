@@ -5,9 +5,9 @@ VisualStudioVersion = 17.11.35222.181
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InventoryTracker.Server", "VelozientApp.Server\InventoryTracker.Server.csproj", "{0F425988-CAC5-4067-B05C-CEABA17231E7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InventoryTracker.Database", "VelozientApp.Database\InventoryTracker.Database.csproj", "{C6F9042A-0264-4562-83C1-034CD2AA965A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InventoryTracker.Database", "VelozientApp.Database\InventoryTracker.Database.csproj", "{C6F9042A-0264-4562-83C1-034CD2AA965A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InventoryTracker.Models", "InventoryTracker.Models\InventoryTracker.Models.csproj", "{DDCC8C5C-649F-4B89-83CE-B2CD904DE113}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InventoryTracker.Models", "InventoryTracker.Models\InventoryTracker.Models.csproj", "{DDCC8C5C-649F-4B89-83CE-B2CD904DE113}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{BC0F25DC-05EA-4124-9874-7420613A999C}"
 	ProjectSection(SolutionItems) = preProject
@@ -16,13 +16,15 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		DatabaseDocker\Dockerfile.SQLite = DatabaseDocker\Dockerfile.SQLite
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InventoryTracker.Contracts", "InventoryTracker.Contracts\InventoryTracker.Contracts.csproj", "{1AE17F74-FBE2-4DE4-B894-D86D1E38A2FC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InventoryTracker.Contracts", "InventoryTracker.Contracts\InventoryTracker.Contracts.csproj", "{1AE17F74-FBE2-4DE4-B894-D86D1E38A2FC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InventoryTracker.Repositories", "InventoryTracker.Repositories\InventoryTracker.Repositories.csproj", "{CD0B7ACA-6C32-4CE7-9E3A-97F1DBEBAD1A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InventoryTracker.Repositories", "InventoryTracker.Repositories\InventoryTracker.Repositories.csproj", "{CD0B7ACA-6C32-4CE7-9E3A-97F1DBEBAD1A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InventoryTracker.DependencyInjection", "InventoryTracker.DependencyInjection\InventoryTracker.DependencyInjection.csproj", "{368ECAAF-D6E9-4D9D-BA89-BDCD5D025BFB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InventoryTracker.DependencyInjection", "InventoryTracker.DependencyInjection\InventoryTracker.DependencyInjection.csproj", "{368ECAAF-D6E9-4D9D-BA89-BDCD5D025BFB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InventoryTracker.Services", "InventoryTracker.Services\InventoryTracker.Services.csproj", "{E8DE54B4-DC1D-4778-9E1D-2619BBCAFE07}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InventoryTracker.Services", "InventoryTracker.Services\InventoryTracker.Services.csproj", "{E8DE54B4-DC1D-4778-9E1D-2619BBCAFE07}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InventoryTracker.Dtos", "InventoryTracker.Dtos\InventoryTracker.Dtos.csproj", "{F00450DA-8593-42C4-91A4-49DF71FF3128}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -58,6 +60,10 @@ Global
 		{E8DE54B4-DC1D-4778-9E1D-2619BBCAFE07}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E8DE54B4-DC1D-4778-9E1D-2619BBCAFE07}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E8DE54B4-DC1D-4778-9E1D-2619BBCAFE07}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F00450DA-8593-42C4-91A4-49DF71FF3128}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F00450DA-8593-42C4-91A4-49DF71FF3128}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F00450DA-8593-42C4-91A4-49DF71FF3128}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F00450DA-8593-42C4-91A4-49DF71FF3128}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

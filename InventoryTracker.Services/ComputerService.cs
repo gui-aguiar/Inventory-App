@@ -1,4 +1,5 @@
 ﻿using InventoryTracker.Contracts;
+using InventoryTracker.Dtos;
 using InventoryTracker.Interfaces;
 using InventoryTracker.Models;
 using Microsoft.EntityFrameworkCore;
@@ -23,6 +24,28 @@ namespace InventoryTracker.Services
             _userService = userService;
         }
 
+        public async Task<IEnumerable<ComputerDto>> GetAllAsync(int offset, int limit)
+        {
+            var computers = await _repository.GetAll()
+                .Include(c => c.Users)
+                .Include(c => c.ComputerStatuses)
+                .Skip(offset)
+                .Take(limit)
+                .ToListAsync();
+
+            return computers.Select(c => new ComputerDto
+            {
+                Id = c.Id,
+                ManufacturerId = c.ComputerManufacturerId,
+                SerialNumber = c.SerialNumber,
+                StatusId = c.ComputerStatuses.FirstOrDefault()?.ComputerStatusId ?? throw new InvalidOperationException("Status is required"),
+                UserId = c.Users.FirstOrDefault()?.User.Id,
+                Specifications = c.Specifications,
+                ImageUrl = c.ImageUrl,
+                PurchaseDate = c.PurchaseDate,
+                WarrantyExpirationDate = c.WarrantyExpirationDate
+            });
+        }
         public override async Task AddAsync(Computer computer)
         {
             await ValidateComputerAsync(computer);

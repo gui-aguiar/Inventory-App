@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\InventoryTracker.Contracts\InventoryTracker.Contracts.csproj" />
+    <ProjectReference Include="..\InventoryTracker.Dtos\InventoryTracker.Dtos.csproj" />
     <ProjectReference Include="..\InventoryTracker.Repositories\InventoryTracker.Repositories.csproj" />
     <ProjectReference Include="..\VelozientApp.Database\InventoryTracker.Database.csproj" />
   </ItemGroup>

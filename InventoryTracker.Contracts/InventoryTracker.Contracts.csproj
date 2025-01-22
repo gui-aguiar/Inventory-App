@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\InventoryTracker.Dtos\InventoryTracker.Dtos.csproj" />
     <ProjectReference Include="..\InventoryTracker.Models\InventoryTracker.Models.csproj" />
   </ItemGroup>
 

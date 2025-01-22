@@ -1,4 +1,5 @@
-﻿using InventoryTracker.Models;
+﻿using InventoryTracker.Dtos;
+using InventoryTracker.Models;
 
 namespace InventoryTracker.Contracts
 {

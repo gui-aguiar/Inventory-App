@@ -22,6 +22,16 @@ namespace InventoryTracker.Database.Configuration
             builder.Property(l => l.AssignDate)
                 .HasColumnName("assign_dt")
                 .IsRequired();
+
+            builder.HasOne(l => l.Computer)
+                .WithMany(c => c.ComputerStatuses)
+                .HasForeignKey(l => l.ComputerId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.HasOne(l => l.Status)
+                .WithMany()
+                .HasForeignKey(l => l.ComputerStatusId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

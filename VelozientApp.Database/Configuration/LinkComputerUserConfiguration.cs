@@ -25,6 +25,16 @@ namespace InventoryTracker.Database.Configuration
 
             builder.Property(l => l.AssignEndDate)
                 .HasColumnName("assign_end_dt");
+
+            builder.HasOne(l => l.Computer)
+                .WithMany(c => c.Users)
+                .HasForeignKey(l => l.ComputerId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.HasOne(l => l.User)
+                .WithMany()
+                .HasForeignKey(l => l.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

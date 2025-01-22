@@ -21,6 +21,11 @@ namespace InventoryTracker.Database.Configuration
             builder.Property(c => c.SerialRegex)
                 .HasColumnName("serial_regex")
                 .HasMaxLength(200);
+
+            builder.HasMany(cm => cm.Computers)
+                .WithOne(c => c.Manufacturer)
+                .HasForeignKey(c => c.ComputerManufacturerId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

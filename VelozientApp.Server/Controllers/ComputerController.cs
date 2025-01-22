@@ -1,7 +1,9 @@
 ﻿using InventoryTracker.Contracts;
+using InventoryTracker.Dtos;
 using InventoryTracker.Interfaces;
 using InventoryTracker.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace InventoryTracker.Server.Controllers
 {
@@ -19,8 +21,25 @@ namespace InventoryTracker.Server.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAll([FromQuery] int offset = 0, [FromQuery] int limit = 10)
         {
+
+            var totalItems = await _computerService.GetTotalCountAsync();
             var computers = await _computerService.GetAllAsync(offset, limit);
-            return Ok(computers);
+
+            var paginationMetadata = new PaginationMetadata
+            {
+                TotalItems = totalItems,
+                PageSize = limit,
+                CurrentPage = (offset / limit) + 1,
+                TotalPages = (int)Math.Ceiling(totalItems / (double)limit)
+            };
+
+            var response = new PagedResponse<ComputerDto>
+            {
+                Data = computers,
+                Pagination = paginationMetadata
+            };
+
+            return Ok(response);
         }
 
         [HttpGet("{id}")]

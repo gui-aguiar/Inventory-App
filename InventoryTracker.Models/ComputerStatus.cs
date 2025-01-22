@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace InventoryTracker.Models
+﻿namespace InventoryTracker.Models
 {
     /// <summary>
     /// Represents a computer status

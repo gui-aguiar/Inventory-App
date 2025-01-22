@@ -31,6 +31,11 @@ namespace InventoryTracker.Database.Configuration
             builder.Property(u => u.CreateDate)
                 .HasColumnName("create_dt")
                 .IsRequired();
+
+            builder.HasMany<LinkComputerUser>()
+                .WithOne()
+                .HasForeignKey(l => l.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

@@ -14,7 +14,6 @@
         public DateTime WarrantyExpirationDate { get; set; }
         public DateTime CreateDate { get; set; }
 
-        // Relacionamentos
         public ComputerManufacturer Manufacturer { get; set; } = null!;
         public ICollection<LinkComputerComputerStatus> ComputerStatuses { get; set; } = new List<LinkComputerComputerStatus>();
         public ICollection<LinkComputerUser> Users { get; set; } = new List<LinkComputerUser>();
