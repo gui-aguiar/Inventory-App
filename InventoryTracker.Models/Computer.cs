@@ -15,7 +15,7 @@
         public DateTime CreateDate { get; set; }
 
         public ComputerManufacturer Manufacturer { get; set; } = null!;
-        public ICollection<LinkComputerComputerStatus> ComputerStatuses { get; set; } = new List<LinkComputerComputerStatus>();
+        public ICollection<LinkComputerStatus> ComputerStatuses { get; set; } = new List<LinkComputerStatus>();
         public ICollection<LinkComputerUser> Users { get; set; } = new List<LinkComputerUser>();
     }
 }

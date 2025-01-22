@@ -7,6 +7,6 @@
     {
         public int Id { get; set; }
         public string LocalizedName { get; set; } = string.Empty;
-        public ICollection<LinkComputerComputerStatus> ComputerStatuses { get; set; } = new List<LinkComputerComputerStatus>();
+        public ICollection<LinkComputerStatus> ComputerStatuses { get; set; } = new List<LinkComputerStatus>();
     }
 }

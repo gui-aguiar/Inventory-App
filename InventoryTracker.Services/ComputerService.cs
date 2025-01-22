@@ -45,9 +45,7 @@ namespace InventoryTracker.Services
           */
             var computers = await _repository.GetAll()
                 .Include(c => c.Users)
-                
                 .Include(c => c.ComputerStatuses)
-                
                 .Skip(offset)
                 .Take(limit)
                 .ToListAsync();
@@ -57,8 +55,8 @@ namespace InventoryTracker.Services
                 Id = c.Id,
                 ManufacturerId = c.ComputerManufacturerId,
                 SerialNumber = c.SerialNumber,
-                StatusId = c.ComputerStatuses.FirstOrDefault()?.ComputerStatusId ?? throw new InvalidOperationException("Status is required"),
-                UserId = c.Users.FirstOrDefault()?.User.Id,
+                StatusId = c.ComputerStatuses.LastOrDefault()?.ComputerStatusId ?? 0,  // vem uma porrada de 1 e o resto 0
+                UserId = c.Users.LastOrDefault()?.Id,   // ok, estou com 80 itens pq eu rodei os dados duas vezes. Segundo , o first estava vindo com dados errados
                 Specifications = c.Specifications,
                 ImageUrl = c.ImageUrl,
                 PurchaseDate = c.PurchaseDate,

@@ -15,7 +15,7 @@ namespace InventoryTracker.Database
         public DbSet<Computer> Computers { get; set; }
         public DbSet<ComputerStatus> ComputerStatuses { get; set; }
         public DbSet<User> Users { get; set; }
-        public DbSet<LinkComputerComputerStatus> ComputerComputerStatuses { get; set; }
+        public DbSet<LinkComputerStatus> ComputerComputerStatuses { get; set; }
         public DbSet<LinkComputerUser> ComputerUsers { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -28,7 +28,7 @@ namespace InventoryTracker.Database
             modelBuilder.ApplyConfiguration(new ComputerConfiguration());
             modelBuilder.ApplyConfiguration(new ComputerStatusConfiguration());
             modelBuilder.ApplyConfiguration(new UserConfiguration());
-            modelBuilder.ApplyConfiguration(new LinkComputerComputerStatusConfiguration());
+            modelBuilder.ApplyConfiguration(new LinkComputerStatusConfiguration());
             modelBuilder.ApplyConfiguration(new LinkComputerUserConfiguration());
 
             modelBuilder.Entity<User>().ToTable("user");
@@ -36,7 +36,7 @@ namespace InventoryTracker.Database
             modelBuilder.Entity<ComputerManufacturer>().ToTable("computer_manufacturer");
             modelBuilder.Entity<ComputerStatus>().ToTable("computer_status");
             modelBuilder.Entity<LinkComputerUser>().ToTable("lnk_computer_user");
-            modelBuilder.Entity<LinkComputerComputerStatus>().ToTable("lnk_computer_computer_status");
+            modelBuilder.Entity<LinkComputerStatus>().ToTable("lnk_computer_computer_status");
         }
    
     }

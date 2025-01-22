@@ -42,7 +42,7 @@ namespace InventoryTracker.Services
 
         public void AssignNewStatus(Computer computer, int newStatusId)
         {
-            computer.ComputerStatuses.Add(new LinkComputerComputerStatus
+            computer.ComputerStatuses.Add(new LinkComputerStatus
             {
                 ComputerId = computer.Id,
                 ComputerStatusId = newStatusId,

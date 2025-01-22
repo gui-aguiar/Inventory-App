@@ -21,7 +21,6 @@ namespace InventoryTracker.Server.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAll([FromQuery] int offset = 0, [FromQuery] int limit = 10)
         {
-
             var totalItems = await _computerService.GetTotalCountAsync();
             var computers = await _computerService.GetAllAsync(offset, limit);
 
@@ -53,19 +52,40 @@ namespace InventoryTracker.Server.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Add([FromBody] Computer computer)
+        public async Task<IActionResult> Add([FromBody] SaveComputerDto computerDto)
         {
+            var computer = new Computer
+            {
+                ComputerManufacturerId = computerDto.ManufacturerId,
+                SerialNumber = computerDto.SerialNumber,
+                Specifications = computerDto.Specifications,
+                ImageUrl = computerDto.ImageUrl,
+                PurchaseDate = computerDto.PurchaseDate,
+                WarrantyExpirationDate = computerDto.WarrantyExpirationDate
+            };
+
             await _computerService.AddAsync(computer);
-            return CreatedAtAction(nameof(GetById), new { id = computer.Id }, computer);
+            return CreatedAtAction(nameof(GetById), new { id = computer.Id }, computerDto);
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] Computer computer)
+        public async Task<IActionResult> Update(int id, [FromBody] SaveComputerDto computerDto)
         {
-            if (id != computer.Id)
+            if (id != computerDto.Id)
                 return BadRequest("ID mismatch");
 
-            await _computerService.UpdateAsync(computer);
+            var existingComputer = await _computerService.GetByIdAsync(id);
+            if (existingComputer == null)
+                return NotFound();
+
+            existingComputer.ComputerManufacturerId = computerDto.ManufacturerId;
+            existingComputer.SerialNumber = computerDto.SerialNumber;
+            existingComputer.Specifications = computerDto.Specifications;
+            existingComputer.ImageUrl = computerDto.ImageUrl;
+            existingComputer.PurchaseDate = computerDto.PurchaseDate;
+            existingComputer.WarrantyExpirationDate = computerDto.WarrantyExpirationDate;
+
+            await _computerService.UpdateAsync(existingComputer);
             return NoContent();
         }
 

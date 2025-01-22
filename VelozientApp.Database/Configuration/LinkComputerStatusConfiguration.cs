@@ -4,9 +4,9 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace InventoryTracker.Database.Configuration
 {
-    public class LinkComputerStatusConfiguration : IEntityTypeConfiguration<LinkComputerComputerStatus>
+    public class LinkComputerStatusConfiguration : IEntityTypeConfiguration<LinkComputerStatus>
     {
-        public void Configure(EntityTypeBuilder<LinkComputerComputerStatus> builder)
+        public void Configure(EntityTypeBuilder<LinkComputerStatus> builder)
         {
             builder.ToTable("lnk_computer_computer_status");
 
@@ -29,7 +29,7 @@ namespace InventoryTracker.Database.Configuration
                 .OnDelete(DeleteBehavior.Cascade);
 
             builder.HasOne(l => l.Status)
-                .WithMany()
+                .WithMany(cs => cs.ComputerStatuses)
                 .HasForeignKey(l => l.ComputerStatusId)
                 .OnDelete(DeleteBehavior.Restrict);
         }

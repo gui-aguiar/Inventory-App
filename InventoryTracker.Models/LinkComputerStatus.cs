@@ -3,7 +3,7 @@
     /// <summary>
     /// Represents the relationship between a computer and its status
     /// </summary>
-    public class LinkComputerComputerStatus
+    public class LinkComputerStatus
     {
         public int Id { get; set; }
         public int ComputerId { get; set; }
