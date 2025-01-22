@@ -14,7 +14,8 @@ namespace InventoryTracker.Database.Configuration
                 .HasColumnName("id");
 
             builder.Property(l => l.UserId)
-                .HasColumnName("user_id");
+                .HasColumnName("user_id")
+                .IsRequired();
 
             builder.Property(l => l.ComputerId)
                 .HasColumnName("computer_id");
@@ -32,7 +33,7 @@ namespace InventoryTracker.Database.Configuration
                 .OnDelete(DeleteBehavior.Cascade);
 
             builder.HasOne(l => l.User)
-                .WithMany()
+                .WithMany(u => u.ComputerUsers)
                 .HasForeignKey(l => l.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
         }

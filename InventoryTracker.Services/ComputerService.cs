@@ -25,10 +25,29 @@ namespace InventoryTracker.Services
         }
 
         public async Task<IEnumerable<ComputerDto>> GetAllAsync(int offset, int limit)
-        {
+        {/*
+          var computers = await _repository.GetAll()
+    .Select(c => new ComputerDto
+    {
+        Id = c.Id,
+        ManufacturerId = c.ComputerManufacturerId,
+        SerialNumber = c.SerialNumber,
+        StatusId = c.ComputerStatuses.FirstOrDefault().ComputerStatusId,
+        UserId = c.Users.FirstOrDefault().UserId,
+        Specifications = c.Specifications,
+        ImageUrl = c.ImageUrl,
+        PurchaseDate = c.PurchaseDate,
+        WarrantyExpirationDate = c.WarrantyExpirationDate
+    })
+    .Skip(offset)
+    .Take(limit)
+    .ToListAsync();
+          */
             var computers = await _repository.GetAll()
                 .Include(c => c.Users)
+                
                 .Include(c => c.ComputerStatuses)
+                
                 .Skip(offset)
                 .Take(limit)
                 .ToListAsync();

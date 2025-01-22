@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace InventoryTracker.Database.Configuration
 {
-    public class LinkComputerComputerStatusConfiguration : IEntityTypeConfiguration<LinkComputerComputerStatus>
+    public class LinkComputerStatusConfiguration : IEntityTypeConfiguration<LinkComputerComputerStatus>
     {
         public void Configure(EntityTypeBuilder<LinkComputerComputerStatus> builder)
         {

@@ -16,6 +16,11 @@ namespace InventoryTracker.Database.Configuration
             builder.Property(cs => cs.LocalizedName)
                 .HasColumnName("localized_name")
                 .IsRequired();
+
+            builder.HasMany(cs => cs.ComputerStatuses)
+                .WithOne(l => l.Status)
+                .HasForeignKey(l => l.ComputerStatusId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

@@ -40,7 +40,7 @@ namespace InventoryTracker.Database.Configuration
                .WithMany(m => m.Computers)
                .HasForeignKey(c => c.ComputerManufacturerId)
                .OnDelete(DeleteBehavior.Restrict);
-            
+
             builder.HasMany(c => c.Users)
                 .WithOne(l => l.Computer)
                 .HasForeignKey(l => l.ComputerId)
