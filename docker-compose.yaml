@@ -17,10 +17,12 @@ services:
     depends_on:
       - database
     ports:
-      - "5000:5000"
-      - "5001:5001"
+      - "${APP_PORT}:5019"      
     environment:
-      - ConnectionStrings__DefaultConnection=Data Source=/data/inventory.db
+      - APP_PORT=${APP_PORT}
+      - DB_PATH=${DB_PATH}
+    volumes:
+      - ./data:/data
     networks:
       - app-network
 

@@ -3,11 +3,10 @@ using InventoryTracker.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
+var port = Environment.GetEnvironmentVariable("APP_PORT") ?? "5018";
 
-// Add services to the container.
-
+builder.Configuration.AddEnvironmentVariables();
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<InventoryTrackerDBContext>(options =>
@@ -17,6 +16,7 @@ builder.Services.AddRepositories();
 builder.Services.AddServices();
 
 var app = builder.Build();
+app.Urls.Add($"http://*:{port}");
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

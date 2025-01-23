@@ -27,4 +27,11 @@ RUN dotnet publish -c Release -o /app/publish
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
 WORKDIR /app
 COPY --from=build /app/publish .
+
+ENV APP_PORT=5019
+EXPOSE ${APP_PORT}
+
+ENV DB_PATH=/data/inventory.db
+RUN mkdir -p /data
+
 ENTRYPOINT ["dotnet", "InventoryTracker.Server.dll"]
