@@ -1,7 +1,6 @@
 using InventoryTracker.Database;
 using InventoryTracker.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
-using VelozientApp.Database;
 
 var builder = WebApplication.CreateBuilder(args);
 

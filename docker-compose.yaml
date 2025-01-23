@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   database:
     build:
@@ -13,8 +11,8 @@ services:
 
   app:
     build:
-      context: ./AppDocker
-      dockerfile: Dockerfile.App
+      context: .
+      dockerfile: AppDocker/Dockerfile.App
     container_name: inventory-app
     depends_on:
       - database

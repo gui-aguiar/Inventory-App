@@ -1,7 +1,6 @@
-﻿using InventoryTracker.Database;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 
-namespace VelozientApp.Database
+namespace InventoryTracker.Database
 {
     public static class InventoryTrackerDBInitializer
     {
