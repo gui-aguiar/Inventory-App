@@ -40,7 +40,7 @@ namespace InventoryTracker.Services
                 Id = c.Id,
                 ManufacturerId = c.ComputerManufacturerId,
                 SerialNumber = c.SerialNumber,
-                StatusId = c.ComputerStatuses.LastOrDefault()?.ComputerStatusId ?? 0,  // forçar status
+                StatusId = c.ComputerStatuses.OrderBy(cs => cs.AssignDate).LastOrDefault()?.ComputerStatusId ?? 0,
                 UserId = c.Users.LastOrDefault(u => u.AssignEndDate == null)?.UserId,
                 Specifications = c.Specifications,
                 ImageUrl = c.ImageUrl,
@@ -259,7 +259,7 @@ namespace InventoryTracker.Services
                 Id = computer.Id,
                 ManufacturerId = computer.ComputerManufacturerId,
                 SerialNumber = computer.SerialNumber,
-                StatusId = computer.ComputerStatuses.LastOrDefault()?.ComputerStatusId ?? 0,  // isso aqui esta vindo tudo fora de ordem . fazer um orderBy
+                StatusId = computer.ComputerStatuses.OrderBy(cs => cs.AssignDate).LastOrDefault()?.ComputerStatusId ?? 0,
                 UserId = computer.Users.LastOrDefault(u => u.AssignEndDate == null)?.UserId,
                 Specifications = computer.Specifications,
                 ImageUrl = computer.ImageUrl,
