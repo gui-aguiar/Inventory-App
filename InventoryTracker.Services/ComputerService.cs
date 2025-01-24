@@ -25,24 +25,7 @@ namespace InventoryTracker.Services
         }
 
         public async Task<IEnumerable<ComputerDto>> GetAllAsync(int offset, int limit)
-        {/*
-          var computers = await _repository.GetAll()
-    .Select(c => new ComputerDto
-    {
-        Id = c.Id,
-        ManufacturerId = c.ComputerManufacturerId,
-        SerialNumber = c.SerialNumber,
-        StatusId = c.ComputerStatuses.FirstOrDefault().ComputerStatusId,
-        UserId = c.Users.FirstOrDefault().UserId,
-        Specifications = c.Specifications,
-        ImageUrl = c.ImageUrl,
-        PurchaseDate = c.PurchaseDate,
-        WarrantyExpirationDate = c.WarrantyExpirationDate
-    })
-    .Skip(offset)
-    .Take(limit)
-    .ToListAsync();
-          */
+        {
             var computers = await _repository.GetAll()
                 .Include(c => c.Users)
                 .Include(c => c.ComputerStatuses)
@@ -55,8 +38,8 @@ namespace InventoryTracker.Services
                 Id = c.Id,
                 ManufacturerId = c.ComputerManufacturerId,
                 SerialNumber = c.SerialNumber,
-                StatusId = c.ComputerStatuses.LastOrDefault()?.ComputerStatusId ?? 0,  // vem uma porrada de 1 e o resto 0
-                UserId = c.Users.LastOrDefault()?.Id,   // ok, estou com 80 itens pq eu rodei os dados duas vezes. Segundo , o first estava vindo com dados errados
+                StatusId = c.ComputerStatuses.LastOrDefault()?.ComputerStatusId ?? 0,
+                UserId = c.Users.LastOrDefault()?.Id,
                 Specifications = c.Specifications,
                 ImageUrl = c.ImageUrl,
                 PurchaseDate = c.PurchaseDate,
@@ -65,15 +48,15 @@ namespace InventoryTracker.Services
         }
         public override async Task AddAsync(Computer computer)
         {
-            await ValidateComputerAsync(computer);
+            await ValidateComputerAsync(computer);            
             _statusService.AssignNewStatus(computer, (int)Status.New);
             await base.AddAsync(computer);
         }
 
         public override async Task UpdateAsync(Computer computer)
-        {
-            await ValidateComputerAsync(computer);
-            await base.UpdateAsync(computer);
+        {   
+            await ValidateComputerAsync(computer);            
+            await _repository.UpdateAsync(computer);
         }
 
         public async Task ChangeStatusAsync(int computerId, int newStatusId)
@@ -108,9 +91,13 @@ namespace InventoryTracker.Services
         private async Task ValidateComputerAsync(Computer computer)
         {
             ValidateRequiredFields(computer);
-            await EnsureUniqueSerialNumberAsync(computer.SerialNumber);
-            await EnsureValidManufacturerAsync(computer.ComputerManufacturerId);
             ValidateSerialNumberFormat(computer);
+
+            var existingComputer = await _repository.GetByIdAsync(computer.Id);
+            if (existingComputer != null && existingComputer.SerialNumber != computer.SerialNumber)            
+                await EnsureUniqueSerialNumberAsync(computer.SerialNumber);
+            
+            await EnsureValidManufacturerAsync(computer.ComputerManufacturerId);            
             ValidateDates(computer);
         }
 

@@ -3,14 +3,18 @@ using InventoryTracker.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
-var port = Environment.GetEnvironmentVariable("APP_PORT") ?? "5018";
-
 builder.Configuration.AddEnvironmentVariables();
+
+var dbPath = Environment.GetEnvironmentVariable("DB_PATH") ?? "D:/data/inventory.db";
+
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection").Replace("__DB_PATH__", dbPath);
+var port = Environment.GetEnvironmentVariable("APP_PORT") ?? "5019";
+
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<InventoryTrackerDBContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlite(connectionString));
 
 builder.Services.AddRepositories();
 builder.Services.AddServices();

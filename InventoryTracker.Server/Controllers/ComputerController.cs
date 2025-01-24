@@ -1,9 +1,7 @@
-﻿using InventoryTracker.Contracts;
-using InventoryTracker.Dtos;
+﻿using InventoryTracker.Dtos;
 using InventoryTracker.Interfaces;
 using InventoryTracker.Models;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace InventoryTracker.Server.Controllers
 {
@@ -48,7 +46,20 @@ namespace InventoryTracker.Server.Controllers
             if (computer == null)
                 return NotFound();
 
-            return Ok(computer);
+            var computerDto = new ComputerDto
+            {
+                Id = computer.Id,
+                ManufacturerId = computer.ComputerManufacturerId,
+                SerialNumber = computer.SerialNumber,
+                StatusId = computer.ComputerStatuses.LastOrDefault()?.ComputerStatusId ?? 0,
+                UserId = computer.Users.LastOrDefault()?.Id,
+                Specifications = computer.Specifications,
+                ImageUrl = computer.ImageUrl,
+                PurchaseDate = computer.PurchaseDate,
+                WarrantyExpirationDate = computer.WarrantyExpirationDate
+            };
+
+            return Ok(computerDto);
         }
 
         [HttpPost]
@@ -65,15 +76,25 @@ namespace InventoryTracker.Server.Controllers
             };
 
             await _computerService.AddAsync(computer);
-            return CreatedAtAction(nameof(GetById), new { id = computer.Id }, computerDto);
+            var responseDto = new ComputerDto
+            {
+                Id = computer.Id,
+                ManufacturerId = computer.ComputerManufacturerId,
+                SerialNumber = computer.SerialNumber,
+                Specifications = computer.Specifications,
+                ImageUrl = computer.ImageUrl,
+                PurchaseDate = computer.PurchaseDate,
+                WarrantyExpirationDate = computer.WarrantyExpirationDate,
+                StatusId = computer.ComputerStatuses.LastOrDefault()?.ComputerStatusId ?? 0,
+                UserId = computer.Users.LastOrDefault()?.Id,
+            };
+
+            return CreatedAtAction(nameof(GetById), new { id = computer.Id }, responseDto);
         }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, [FromBody] SaveComputerDto computerDto)
         {
-            if (id != computerDto.Id)
-                return BadRequest("ID mismatch");
-
             var existingComputer = await _computerService.GetByIdAsync(id);
             if (existingComputer == null)
                 return NotFound();
