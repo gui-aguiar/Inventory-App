@@ -2,12 +2,15 @@
 using InventoryTracker.Dtos;
 using InventoryTracker.Interfaces;
 using InventoryTracker.Models;
+using InventoryTracker.Repositories;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
 
 namespace InventoryTracker.Services
 {
-    public class ComputerService : Service<Computer>, IComputerService
+    public class ComputerService: IComputerService
     {
+        private readonly IRepository<Computer> _repository;
         private readonly IRepository<ComputerManufacturer> _manufacturerRepository;
         private readonly IComputerStatusService _statusService;
         private readonly IComputerUserService _userService;
@@ -17,8 +20,9 @@ namespace InventoryTracker.Services
             IRepository<ComputerManufacturer> manufacturerRepository,
             IComputerStatusService statusService,
             IComputerUserService userService
-        ) : base(repository)
+        )
         {
+            _repository = repository;
             _manufacturerRepository = manufacturerRepository;
             _statusService = statusService;
             _userService = userService;
@@ -46,14 +50,14 @@ namespace InventoryTracker.Services
                 WarrantyExpirationDate = c.WarrantyExpirationDate
             });
         }
-        public override async Task AddAsync(Computer computer)
+        public async Task AddAsync(Computer computer)
         {
             await ValidateComputerAsync(computer);            
             _statusService.AssignNewStatus(computer, (int)Status.New);
-            await base.AddAsync(computer);
+            await _repository.AddAsync(computer);
         }
 
-        public override async Task UpdateAsync(Computer computer)
+        public async Task UpdateAsync(Computer computer)
         {   
             await ValidateComputerAsync(computer);            
             await _repository.UpdateAsync(computer);
@@ -206,6 +210,49 @@ namespace InventoryTracker.Services
             {
                 currentAssignment.AssignEndDate = DateTime.UtcNow;
             }
+        }
+
+        public async Task<ComputerDto> GetDtoByIdAsync(int id)
+        {
+            var computer = await _repository.GetAll()
+                .Include(c => c.Users)
+                .Include(c => c.ComputerStatuses)
+                .FirstOrDefaultAsync(c => c.Id == id);
+
+            if (computer == null)
+                throw new KeyNotFoundException($"Computer with ID '{id}' not found.");
+
+            return new ComputerDto
+            {
+                Id = computer.Id,
+                ManufacturerId = computer.ComputerManufacturerId,
+                SerialNumber = computer.SerialNumber,
+                StatusId = computer.ComputerStatuses.LastOrDefault()?.ComputerStatusId ?? 0,
+                UserId = computer.Users.LastOrDefault()?.Id,
+                Specifications = computer.Specifications,
+                ImageUrl = computer.ImageUrl,
+                PurchaseDate = computer.PurchaseDate,
+                WarrantyExpirationDate = computer.WarrantyExpirationDate
+            };
+        }
+
+        public async Task<Computer> GetByIdAsync(int id)
+        {
+            return await _repository.GetByIdAsync(id);
+        }
+
+        public async Task<int> GetTotalCountAsync()
+        {
+            return await _repository.GetAll().CountAsync();
+        }
+
+        public async Task DeleteAsync(int id)
+        {
+            var computer = await _repository.GetByIdAsync(id);
+            if (computer == null)
+                throw new KeyNotFoundException($"Computer not found");
+
+            await _repository.DeleteAsync(computer);
         }
     }
 }

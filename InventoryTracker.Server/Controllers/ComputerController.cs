@@ -42,22 +42,9 @@ namespace InventoryTracker.Server.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
-            var computer = await _computerService.GetByIdAsync(id);
-            if (computer == null)
+            var computerDto = await _computerService.GetDtoByIdAsync(id);
+            if (computerDto == null)
                 return NotFound();
-
-            var computerDto = new ComputerDto
-            {
-                Id = computer.Id,
-                ManufacturerId = computer.ComputerManufacturerId,
-                SerialNumber = computer.SerialNumber,
-                StatusId = computer.ComputerStatuses.LastOrDefault()?.ComputerStatusId ?? 0,
-                UserId = computer.Users.LastOrDefault()?.Id,
-                Specifications = computer.Specifications,
-                ImageUrl = computer.ImageUrl,
-                PurchaseDate = computer.PurchaseDate,
-                WarrantyExpirationDate = computer.WarrantyExpirationDate
-            };
 
             return Ok(computerDto);
         }
