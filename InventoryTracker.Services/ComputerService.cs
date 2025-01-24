@@ -2,9 +2,7 @@
 using InventoryTracker.Dtos;
 using InventoryTracker.Interfaces;
 using InventoryTracker.Models;
-using InventoryTracker.Repositories;
 using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
 
 namespace InventoryTracker.Services
 {
@@ -42,8 +40,8 @@ namespace InventoryTracker.Services
                 Id = c.Id,
                 ManufacturerId = c.ComputerManufacturerId,
                 SerialNumber = c.SerialNumber,
-                StatusId = c.ComputerStatuses.LastOrDefault()?.ComputerStatusId ?? 0,
-                UserId = c.Users.LastOrDefault()?.Id,
+                StatusId = c.ComputerStatuses.LastOrDefault()?.ComputerStatusId ?? 0,  // forçar status
+                UserId = c.Users.LastOrDefault(u => u.AssignEndDate == null)?.UserId,
                 Specifications = c.Specifications,
                 ImageUrl = c.ImageUrl,
                 PurchaseDate = c.PurchaseDate,
@@ -65,7 +63,14 @@ namespace InventoryTracker.Services
 
         public async Task ChangeStatusAsync(int computerId, int newStatusId)
         {
-            var computer = await GetComputerOrThrowAsync(computerId);
+            var computer = await _repository.GetAll()
+                .Include(c => c.ComputerStatuses)
+                .Include(c => c.Users)
+                .FirstOrDefaultAsync(c => c.Id == computerId);
+
+            if (computer == null)
+                throw new KeyNotFoundException($"Computer with ID '{computerId}' not found.");
+
 
             ValidateStatusChange(computer, newStatusId);
             UnassignUserIfNeeded(computer, newStatusId);
@@ -77,10 +82,15 @@ namespace InventoryTracker.Services
 
         public async Task AssignUserAsync(int computerId, int userId)
         {
-            var computer = await GetComputerOrThrowAsync(computerId);
-            var user = await _userService.GetUserOrThrowAsync(userId);
+            var computer = await _repository.GetAll()
+                .Include(c => c.ComputerStatuses)
+                .Include(c => c.Users)
+                .FirstOrDefaultAsync(c => c.Id == computerId);
+    
+            if (computer == null)
+                throw new KeyNotFoundException($"Computer with ID '{computerId}' not found.");
 
-            EnsureCanAssignUser(computer);
+            var user = await _userService.GetUserOrThrowAsync(userId);
 
             FinalizeCurrentUserAssignment(computer);
             _userService.AssignNewUser(computer, user);
@@ -89,6 +99,28 @@ namespace InventoryTracker.Services
 
             await _repository.UpdateAsync(computer);
         }
+
+        public async Task UnassignUserAsync(int computerId)
+        {
+            var computer = await _repository.GetAll()
+                .Include(c => c.Users)
+                .Include(c => c.ComputerStatuses)
+                .FirstOrDefaultAsync(c => c.Id == computerId);
+
+            if (computer == null)
+                throw new KeyNotFoundException($"Computer with ID '{computerId}' not found.");
+
+            var currentAssignment = computer.Users.FirstOrDefault(u => u.AssignEndDate == null); // o ultimo na ordem de inicio ? ou o primeiro que tem endDate diferente de nulo?
+            if (currentAssignment == null)
+                throw new InvalidOperationException($"No user is currently assigned to Computer ID '{computerId}'.");
+            
+            currentAssignment.AssignEndDate = DateTime.UtcNow;
+            
+            _statusService.AssignNewStatus(computer, (int)Status.Available);
+
+            await _repository.UpdateAsync(computer);
+        }
+
 
         // ----------- Private Helper Methods -----------
 
@@ -103,16 +135,6 @@ namespace InventoryTracker.Services
             
             await EnsureValidManufacturerAsync(computer.ComputerManufacturerId);            
             ValidateDates(computer);
-        }
-
-        private void EnsureCanAssignUser(Computer computer)
-        {
-            var currentStatus = _statusService.GetCurrentStatusAsync(computer).Result;
-
-            if (currentStatus != Status.Available && currentStatus != Status.New)
-            {
-                throw new InvalidOperationException($"Cannot assign a user to a computer in the status '{currentStatus}'.");
-            }
         }
 
         private async Task<Computer> GetComputerOrThrowAsync(int computerId)
@@ -182,6 +204,11 @@ namespace InventoryTracker.Services
             {
                 throw new InvalidOperationException($"The computer is already in the status '{currentStatus}'.");
             }
+            
+            if (currentStatus == Status.Retired) // sem esse nao dava erro la na outra validacao 
+            {
+                throw new InvalidOperationException("Computer has been retired.");
+            }
 
             if ((Status)newStatusId == Status.New)
             {
@@ -191,6 +218,11 @@ namespace InventoryTracker.Services
             if ((Status)newStatusId == Status.InUse)
             {
                 throw new InvalidOperationException("Status 'In Use' can only be set via user assignment.");
+            }
+
+            if ((Status)newStatusId == Status.Available)
+            {
+                throw new InvalidOperationException("Status 'Available' can only be set via user unassignment.");
             }
 
             _statusService.ValidateStatusTransition(currentStatus, (Status)newStatusId);
@@ -227,8 +259,8 @@ namespace InventoryTracker.Services
                 Id = computer.Id,
                 ManufacturerId = computer.ComputerManufacturerId,
                 SerialNumber = computer.SerialNumber,
-                StatusId = computer.ComputerStatuses.LastOrDefault()?.ComputerStatusId ?? 0,
-                UserId = computer.Users.LastOrDefault()?.Id,
+                StatusId = computer.ComputerStatuses.LastOrDefault()?.ComputerStatusId ?? 0,  // isso aqui esta vindo tudo fora de ordem . fazer um orderBy
+                UserId = computer.Users.LastOrDefault(u => u.AssignEndDate == null)?.UserId,
                 Specifications = computer.Specifications,
                 ImageUrl = computer.ImageUrl,
                 PurchaseDate = computer.PurchaseDate,

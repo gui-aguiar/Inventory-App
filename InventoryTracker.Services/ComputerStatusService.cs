@@ -49,34 +49,5 @@ namespace InventoryTracker.Services
                 AssignDate = DateTime.UtcNow
             });
         }
-
-        /*private bool ValidateStatusTransition(Status currentStatus, Status newStatus)
-       {
-           var validTransitions = new Dictionary<Status, List<Status>>
-           {
-               { Status.New, new List<Status> { Status.InUse } },
-               { Status.InUse, new List<Status> { Status.Available, Status.InMaintenance, Status.Retired } },
-               { Status.Available, new List<Status> { Status.InUse, Status.Retired } },
-               { Status.InMaintenance, new List<Status> { Status.Available, Status.Retired } },
-               { Status.Retired, new List<Status>() }
-           };
-
-           return validTransitions.TryGetValue(currentStatus, out var allowedStatuses)
-               && allowedStatuses.Contains(newStatus);
-       }
-
-        private bool ValidateStatusTransition(Status currentStatus, Status newStatus)
-        {
-            var validTransitions = new Dictionary<Status, List<Status>>
-            {
-                { Status.New, new List<Status> { Status.InUse } },
-                { Status.InUse, new List<Status> { Status.Available, Status.InMaintenance, Status.Retired } },
-                { Status.Available, new List<Status> { Status.InUse, Status.Retired } },
-                { Status.InMaintenance, new List<Status> { Status.Available, Status.Retired } },
-                { Status.Retired, new List<Status>() }
-            };
-
-            return validTransitions[currentStatus].Contains(newStatus);
-        }*/
     }
 }

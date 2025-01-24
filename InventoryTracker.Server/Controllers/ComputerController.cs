@@ -73,7 +73,7 @@ namespace InventoryTracker.Server.Controllers
                 PurchaseDate = computer.PurchaseDate,
                 WarrantyExpirationDate = computer.WarrantyExpirationDate,
                 StatusId = computer.ComputerStatuses.LastOrDefault()?.ComputerStatusId ?? 0,
-                UserId = computer.Users.LastOrDefault()?.Id,
+                UserId = computer.Users.LastOrDefault(u => u.AssignEndDate != null)?.UserId
             };
 
             return CreatedAtAction(nameof(GetById), new { id = computer.Id }, responseDto);
@@ -104,7 +104,7 @@ namespace InventoryTracker.Server.Controllers
             return NoContent();
         }
 
-        [HttpPost("{id}/change-status")]
+        [HttpPut("{id}/change-status")]
         public async Task<IActionResult> ChangeStatus(int id, [FromBody] ChangeStatusRequest request)
         {
             try
@@ -123,7 +123,7 @@ namespace InventoryTracker.Server.Controllers
             }
         }
 
-        [HttpPut("{computerId}/assign-user")]
+        [HttpPut("{computerId}/user")]
         public async Task<IActionResult> AssignUserToComputer(int computerId, [FromBody] AssignUserRequest request)
         {
             if (request == null || request.UserId <= 0)
@@ -149,13 +149,35 @@ namespace InventoryTracker.Server.Controllers
                 return StatusCode(500, "An unexpected error occurred: " + ex.Message);
             }
         }
+
+        [HttpDelete("{computerId}/user")]
+        public async Task<IActionResult> UnassignUserToComputer(int computerId)
+        {
+            try
+            {
+                await _computerService.UnassignUserAsync(computerId);
+                return NoContent();
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(ex.Message); // For logical inconsistencies
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "An unexpected error occurred: " + ex.Message);
+            }
+        }
     }
-    public class ChangeStatusRequest
+    public class ChangeStatusRequest  // Dto
     {
         public int StatusId { get; set; }
     }
 
-    public class AssignUserRequest
+    public class AssignUserRequest  // Dto
     {
         public int UserId { get; set; }
     }
