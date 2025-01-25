@@ -103,20 +103,8 @@ namespace InventoryTracker.Server.Controllers
         [HttpPut("{id}/change-status")]
         public async Task<IActionResult> ChangeStatus(int id, [FromBody] ChangeStatusDto statusDto)
         {
-            try
-            {
-                await _computerService.ChangeStatusAsync(id, statusDto.StatusId);
-                return NoContent();
-            }
-
-            catch (ArgumentException ex)
-            {
-                return BadRequest(new { Error = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { Error = "An unexpected error occurred.", Details = ex.Message });
-            }
+            await _computerService.ChangeStatusAsync(id, statusDto.StatusId);
+            return NoContent();
         }
 
         [HttpPut("{computerId}/user")]

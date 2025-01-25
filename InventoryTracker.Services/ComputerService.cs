@@ -81,7 +81,12 @@ namespace InventoryTracker.Services
             if (computer == null)
                 throw new KeyNotFoundException($"Computer with ID '{computerId}' not found.");
 
-            ValidateStatusChange(computer, newStatusId);
+            var currentStatus = _statusService.GetCurrentStatusAsync(computer).Result;
+
+            ValidateStatusOpertion(newStatusId);
+
+            _statusService.ValidateStatusTransition(currentStatus, (Status)newStatusId);
+
             UnassignUserIfNeeded(computer, newStatusId);
 
             _statusService.AssignNewStatus(computer, newStatusId);
@@ -198,25 +203,8 @@ namespace InventoryTracker.Services
             }
         }
 
-        private void ValidateStatusChange(Computer computer, int newStatusId)
+        private void ValidateStatusOpertion(int newStatusId)
         {
-            var currentStatus = _statusService.GetCurrentStatusAsync(computer).Result;
-
-            if (currentStatus == (Status)newStatusId)
-            {
-                throw new InvalidOperationException($"The computer is already in the status '{currentStatus}'.");
-            }
-            
-            if (currentStatus == Status.Retired)
-            {
-                throw new InvalidOperationException("Computer has been retired.");
-            }
-
-            if ((Status)newStatusId == Status.New)
-            {
-                throw new InvalidOperationException("Cannot set status back to 'New'.");
-            }
-
             if ((Status)newStatusId == Status.InUse)
             {
                 throw new InvalidOperationException("Status 'In Use' can only be set via user assignment.");
@@ -226,8 +214,6 @@ namespace InventoryTracker.Services
             {
                 throw new InvalidOperationException("Status 'Available' can only be set via user unassignment.");
             }
-
-            _statusService.ValidateStatusTransition(currentStatus, (Status)newStatusId);
         }
 
         private void UnassignUserIfNeeded(Computer computer, int newStatusId)
@@ -245,7 +231,7 @@ namespace InventoryTracker.Services
             {
                 currentAssignment.AssignEndDate = DateTime.UtcNow;
             }
-        }
+        }  // user servce?
 
         public async Task<ComputerDto> GetDtoByIdAsync(int id)
         {

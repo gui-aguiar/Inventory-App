@@ -25,6 +25,21 @@ namespace InventoryTracker.Services
 
         public void ValidateStatusTransition(Status currentStatus, Status newStatus)
         {
+            if (currentStatus == (Status)newStatus)
+            {
+                throw new InvalidOperationException($"The computer is already in the status '{currentStatus}'.");
+            }
+
+            if (currentStatus == Status.Retired)
+            {
+                throw new InvalidOperationException("Computer has been retired.");
+            }
+
+            if ((Status)newStatus == Status.New)
+            {
+                throw new InvalidOperationException("Cannot set status back to 'New'.");
+            }
+
             var validTransitions = new Dictionary<Status, List<Status>>
             {
                 { Status.New, new List<Status> { Status.InUse } },
