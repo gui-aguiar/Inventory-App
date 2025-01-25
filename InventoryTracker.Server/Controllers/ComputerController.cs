@@ -81,8 +81,6 @@ namespace InventoryTracker.Server.Controllers
         public async Task<IActionResult> Update(int id, [FromBody] SaveComputerDto computerDto)
         {
             var existingComputer = await _computerService.GetByIdAsync(id);
-            if (existingComputer == null)
-                return NotFound();
 
             existingComputer.ComputerManufacturerId = computerDto.ManufacturerId;
             existingComputer.SerialNumber = computerDto.SerialNumber;
