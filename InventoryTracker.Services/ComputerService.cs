@@ -3,6 +3,8 @@ using InventoryTracker.Dtos;
 using InventoryTracker.Interfaces;
 using InventoryTracker.Models;
 using Microsoft.EntityFrameworkCore;
+using InventoryTracker.Utils;
+using AutoMapper;
 
 namespace InventoryTracker.Services
 {
@@ -12,35 +14,39 @@ namespace InventoryTracker.Services
         private readonly IRepository<ComputerManufacturer> _manufacturerRepository;
         private readonly IComputerStatusService _statusService;
         private readonly IComputerUserService _userService;
+        private readonly IMapper _mapper;
 
         public ComputerService(
             IRepository<Computer> repository,
             IRepository<ComputerManufacturer> manufacturerRepository,
             IComputerStatusService statusService,
-            IComputerUserService userService
+            IComputerUserService userService,
+            IMapper mapper
         )
         {
             _repository = repository;
             _manufacturerRepository = manufacturerRepository;
             _statusService = statusService;
             _userService = userService;
+            _mapper = mapper;
         }
 
-        public async Task<IEnumerable<Computer>> GetAllAsync(int offset, int limit)
+        public async Task<(IEnumerable<ComputerDto> Data, PaginationMetadata Metadata)> GetAllAsync(int offset, int limit)
         {
             if (offset < 0 || limit <= 0)
                 throw new ArgumentException("Offset must be >= 0 and limit must be > 0.");
 
-            var computers = await _repository.GetAll()
-                .Include(c => c.Users)
-                .Include(c => c.ComputerStatuses)
-                .Skip(offset)
-                .Take(limit)
-                .ToListAsync();
+            var totalItems = await _repository.GetAll().CountAsync();
+            var metadata = PaginationHelper.CalculateMetadata(totalItems, limit, (offset / limit) + 1);
 
-            return computers;
+            var paginatedData = await PaginationHelper.ApplyPagination(_repository.GetAll()
+                .Include(c => c.Users)
+                .Include(c => c.ComputerStatuses), offset, limit).ToListAsync();
+
+            var data = _mapper.Map<IEnumerable<ComputerDto>>(paginatedData);
+            return (data, metadata);
         }
-        
+
         public async Task AddAsync(Computer computer)
         {
             await ValidateComputerAsync(computer);            
@@ -48,7 +54,7 @@ namespace InventoryTracker.Services
             await _repository.AddAsync(computer);
         }
 
-        public async Task<Computer> GetByIdAsync(int id)
+        private async Task<Computer> GetByIdAsync(int id)
         {
             var computer = await _repository.GetAll()
                 .Include(c => c.Users)
@@ -58,10 +64,13 @@ namespace InventoryTracker.Services
             return computer ?? throw new KeyNotFoundException($"Computer with ID '{id}' not found.");
         }
 
-        public async Task UpdateAsync(Computer computer)
-        {                  
-            await ValidateComputerAsync(computer);            
-            await _repository.UpdateAsync(computer);
+        public async Task UpdateAsync(int id, SaveComputerDto computerDto)
+        {
+            var existingComputer = await GetByIdAsync(id);
+            _mapper.Map(computerDto, existingComputer);
+
+            await ValidateComputerAsync(existingComputer);            
+            await _repository.UpdateAsync(existingComputer);
         }
 
         public async Task DeleteAsync(int id)
@@ -135,33 +144,9 @@ namespace InventoryTracker.Services
 
         public async Task<ComputerDto> GetDtoByIdAsync(int id)
         {
-            var computer = await _repository.GetAll()
-                .Include(c => c.Users)
-                .Include(c => c.ComputerStatuses)
-                .FirstOrDefaultAsync(c => c.Id == id);
-
-            if (computer == null)
-                throw new KeyNotFoundException($"Computer with ID '{id}' not found.");
-
-            return new ComputerDto
-            {
-                Id = computer.Id,
-                ManufacturerId = computer.ComputerManufacturerId,
-                SerialNumber = computer.SerialNumber,
-                StatusId = computer.ComputerStatuses.OrderBy(cs => cs.AssignDate).LastOrDefault()?.ComputerStatusId ?? 0,
-                UserId = computer.Users.LastOrDefault(u => u.AssignEndDate == null)?.UserId,
-                Specifications = computer.Specifications,
-                ImageUrl = computer.ImageUrl,
-                PurchaseDate = computer.PurchaseDate,
-                WarrantyExpirationDate = computer.WarrantyExpirationDate
-            };
+            var computer = await GetByIdAsync(id);
+            return _mapper.Map<ComputerDto>(computer);            
         }
-
-        public async Task<int> GetTotalCountAsync()
-        {
-            return await _repository.GetAll().CountAsync();
-        }
-
 
         private async Task ValidateComputerAsync(Computer computer)
         {
@@ -257,6 +242,13 @@ namespace InventoryTracker.Services
             {
                 currentAssignment.AssignEndDate = DateTime.UtcNow;
             }
+        }
+
+        public async Task<ComputerDto> AddAndReturnDtoAsync(SaveComputerDto computerDto)
+        {
+            var computer = _mapper.Map<Computer>(computerDto);
+            await AddAsync(computer);
+            return _mapper.Map<ComputerDto>(computer);
         }
     }
 }

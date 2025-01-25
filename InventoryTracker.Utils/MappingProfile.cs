@@ -2,7 +2,7 @@
 using InventoryTracker.Dtos;
 using InventoryTracker.Models;
 
-namespace InventoryTracker.Server.AutoMappers
+namespace InventoryTracker.Utils
 {
     public class MappingProfile : Profile
     {

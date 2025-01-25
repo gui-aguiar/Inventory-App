@@ -27,6 +27,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InventoryTracker.Services",
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InventoryTracker.Dtos", "InventoryTracker.Dtos\InventoryTracker.Dtos.csproj", "{F00450DA-8593-42C4-91A4-49DF71FF3128}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InventoryTracker.Utils", "InventoryTracker.Utils\InventoryTracker.Utils.csproj", "{3AF94589-BE70-4B3C-BB46-5FB13DEE9423}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -65,6 +67,10 @@ Global
 		{F00450DA-8593-42C4-91A4-49DF71FF3128}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F00450DA-8593-42C4-91A4-49DF71FF3128}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F00450DA-8593-42C4-91A4-49DF71FF3128}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3AF94589-BE70-4B3C-BB46-5FB13DEE9423}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3AF94589-BE70-4B3C-BB46-5FB13DEE9423}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3AF94589-BE70-4B3C-BB46-5FB13DEE9423}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3AF94589-BE70-4B3C-BB46-5FB13DEE9423}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

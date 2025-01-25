@@ -11,63 +11,39 @@ namespace InventoryTracker.Server.Controllers
     public class ComputerController : ControllerBase
     {
         private readonly IComputerService _computerService;
-        private readonly IMapper _mapper;
 
         public ComputerController(IComputerService computerService, IMapper mapper)
         {
             _computerService = computerService;
-            _mapper = mapper;
         }
 
         [HttpGet]
         public async Task<IActionResult> GetAll([FromQuery] int offset = 0, [FromQuery] int limit = 10)
         {
+            var (computers, metadata) = await _computerService.GetAllAsync(offset, limit);
 
-            var totalItems = await _computerService.GetTotalCountAsync();
-            var computers = await _computerService.GetAllAsync(offset, limit);
-
-            var paginationMetadata = new PaginationMetadata
-            {
-                TotalItems = totalItems,
-                PageSize = limit,
-                CurrentPage = (offset / limit) + 1,
-                TotalPages = (int)Math.Ceiling(totalItems / (double)limit)
-            };
-
-            var response = new PagedResponse<ComputerDto>
-            {
-                Data = _mapper.Map<IEnumerable<ComputerDto>>(computers),
-                Pagination = paginationMetadata
-            };
-
+            var response = CreatePagedResponse(computers, metadata);
             return Ok(response);
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
-            var computer = await _computerService.GetByIdAsync(id);
-            var computerDto = _mapper.Map<ComputerDto>(computer);
+            var computerDto = await _computerService.GetDtoByIdAsync(id);            
             return Ok(computerDto);
         }
 
         [HttpPost]
         public async Task<IActionResult> Add([FromBody] SaveComputerDto computerDto)
         {
-            var computer = _mapper.Map<Computer>(computerDto);
-            await _computerService.AddAsync(computer);
-
-            var responseDto = _mapper.Map<ComputerDto>(computer);
-            return CreatedAtAction(nameof(GetById), new { id = computer.Id }, responseDto);
+            var responseDto = await _computerService.AddAndReturnDtoAsync(computerDto);
+            return CreatedAtAction(nameof(GetById), new { id = responseDto.Id }, responseDto);
         }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, [FromBody] SaveComputerDto computerDto)
         {
-            var existingComputer = await _computerService.GetByIdAsync(id);
-            _mapper.Map(computerDto, existingComputer);
-
-            await _computerService.UpdateAsync(existingComputer);
+            await _computerService.UpdateAsync(id, computerDto);
             return NoContent();
         }
 
@@ -78,7 +54,7 @@ namespace InventoryTracker.Server.Controllers
             return NoContent();
         }
 
-        [HttpPut("{id}/change-status")]
+        [HttpPut("{id}/status")]
         public async Task<IActionResult> ChangeStatus(int id, [FromBody] ChangeStatusDto statusDto)
         {
             await _computerService.ChangeStatusAsync(id, statusDto.StatusId);
@@ -86,17 +62,26 @@ namespace InventoryTracker.Server.Controllers
         }
 
         [HttpPut("{computerId}/user")]
-        public async Task<IActionResult> AssignUserToComputer(int computerId, [FromBody] ChangeUserDto changeUserDto)
+        public async Task<IActionResult> AssignUser(int computerId, [FromBody] ChangeUserDto changeUserDto)
         {
             await _computerService.AssignUserAsync(computerId, changeUserDto.UserId);
             return NoContent();
         }
 
         [HttpDelete("{computerId}/user")]
-        public async Task<IActionResult> UnassignUserToComputer(int computerId)
+        public async Task<IActionResult> UnassignUser(int computerId)
         {
             await _computerService.UnassignUserAsync(computerId);
             return NoContent();          
+        }
+
+        private PagedResponse<T> CreatePagedResponse<T>(IEnumerable<T> data, PaginationMetadata metadata)
+        {
+            return new PagedResponse<T>
+            {
+                Data = data,
+                Pagination = metadata
+            };
         }
     }
 }

@@ -1,7 +1,7 @@
 using InventoryTracker.Database;
 using InventoryTracker.DependencyInjection;
-using InventoryTracker.Server.AutoMappers;
 using InventoryTracker.Server.Middlewares;
+using InventoryTracker.Utils;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 
