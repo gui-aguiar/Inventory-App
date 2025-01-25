@@ -26,7 +26,7 @@ namespace InventoryTracker.Services
             _userService = userService;
         }
 
-        public async Task<IEnumerable<ComputerDto>> GetAllAsync(int offset, int limit)
+        public async Task<IEnumerable<Computer>> GetAllAsync(int offset, int limit)
         {
             if (offset < 0 || limit <= 0)
                 throw new ArgumentException("Offset must be >= 0 and limit must be > 0.");
@@ -38,18 +38,7 @@ namespace InventoryTracker.Services
                 .Take(limit)
                 .ToListAsync();
 
-            return computers.Select(c => new ComputerDto
-            {
-                Id = c.Id,
-                ManufacturerId = c.ComputerManufacturerId,
-                SerialNumber = c.SerialNumber,
-                StatusId = c.ComputerStatuses.OrderBy(cs => cs.AssignDate).LastOrDefault()?.ComputerStatusId ?? 0,
-                UserId = c.Users.LastOrDefault(u => u.AssignEndDate == null)?.UserId,
-                Specifications = c.Specifications,
-                ImageUrl = c.ImageUrl,
-                PurchaseDate = c.PurchaseDate,
-                WarrantyExpirationDate = c.WarrantyExpirationDate
-            });
+            return computers;
         }
         
         public async Task AddAsync(Computer computer)
@@ -61,7 +50,12 @@ namespace InventoryTracker.Services
 
         public async Task<Computer> GetByIdAsync(int id)
         {
-            return await _repository.GetByIdAsync(id) ?? throw new KeyNotFoundException($"Computer with ID '{id}' not found.");
+            var computer = await _repository.GetAll()
+                .Include(c => c.Users)
+                .Include(c => c.ComputerStatuses)
+                .FirstOrDefaultAsync(c => c.Id == id);
+
+            return computer ?? throw new KeyNotFoundException($"Computer with ID '{id}' not found.");
         }
 
         public async Task UpdateAsync(Computer computer)
@@ -128,7 +122,7 @@ namespace InventoryTracker.Services
             if (computer == null)
                 throw new KeyNotFoundException($"Computer with ID '{computerId}' not found.");
 
-            var currentAssignment = computer.Users.FirstOrDefault(u => u.AssignEndDate == null); // o ultimo na ordem de inicio ? ou o primeiro que tem endDate diferente de nulo?
+            var currentAssignment = computer.Users.FirstOrDefault(u => u.AssignEndDate == null);
             if (currentAssignment == null)
                 throw new InvalidOperationException($"No user is currently assigned to Computer ID '{computerId}'.");
             
@@ -168,7 +162,6 @@ namespace InventoryTracker.Services
             return await _repository.GetAll().CountAsync();
         }
 
-        // ----------- Private Helper Methods -----------
 
         private async Task ValidateComputerAsync(Computer computer)
         {
@@ -206,7 +199,7 @@ namespace InventoryTracker.Services
                 throw new ArgumentException($"Invalid serial number for manufacturer '{manufacturer.Name}'.");
             }
         }
-       
+
         private async Task EnsureUniqueSerialNumberAsync(string serialNumber)
         {
             if (await _repository.GetAll().AnyAsync(c => c.SerialNumber == serialNumber))

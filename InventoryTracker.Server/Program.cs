@@ -1,5 +1,6 @@
 using InventoryTracker.Database;
 using InventoryTracker.DependencyInjection;
+using InventoryTracker.Server.AutoMappers;
 using InventoryTracker.Server.Middlewares;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
@@ -13,6 +14,7 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 var port = Environment.GetEnvironmentVariable("APP_PORT") ?? "5019";
 
 builder.Services.AddControllers();
+builder.Services.AddAutoMapper(typeof(MappingProfile));
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 var connection = new SqliteConnection("DataSource=:memory:");

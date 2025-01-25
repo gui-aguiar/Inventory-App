@@ -1,4 +1,5 @@
-﻿using InventoryTracker.Dtos;
+﻿using AutoMapper;
+using InventoryTracker.Dtos;
 using InventoryTracker.Interfaces;
 using InventoryTracker.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -10,10 +11,12 @@ namespace InventoryTracker.Server.Controllers
     public class ComputerController : ControllerBase
     {
         private readonly IComputerService _computerService;
+        private readonly IMapper _mapper;
 
-        public ComputerController(IComputerService computerService)
+        public ComputerController(IComputerService computerService, IMapper mapper)
         {
             _computerService = computerService;
+            _mapper = mapper;
         }
 
         [HttpGet]
@@ -33,7 +36,7 @@ namespace InventoryTracker.Server.Controllers
 
             var response = new PagedResponse<ComputerDto>
             {
-                Data = computers,
+                Data = _mapper.Map<IEnumerable<ComputerDto>>(computers),
                 Pagination = paginationMetadata
             };
 
@@ -43,37 +46,18 @@ namespace InventoryTracker.Server.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
-            var computerDto = await _computerService.GetDtoByIdAsync(id);
-            return Ok(computerDto);        
+            var computer = await _computerService.GetByIdAsync(id);
+            var computerDto = _mapper.Map<ComputerDto>(computer);
+            return Ok(computerDto);
         }
 
         [HttpPost]
         public async Task<IActionResult> Add([FromBody] SaveComputerDto computerDto)
         {
-            var computer = new Computer
-            {
-                ComputerManufacturerId = computerDto.ManufacturerId,
-                SerialNumber = computerDto.SerialNumber,
-                Specifications = computerDto.Specifications,
-                ImageUrl = computerDto.ImageUrl,
-                PurchaseDate = computerDto.PurchaseDate,
-                WarrantyExpirationDate = computerDto.WarrantyExpirationDate
-            };
-
+            var computer = _mapper.Map<Computer>(computerDto);
             await _computerService.AddAsync(computer);
-            var responseDto = new ComputerDto
-            {
-                Id = computer.Id,
-                ManufacturerId = computer.ComputerManufacturerId,
-                SerialNumber = computer.SerialNumber,
-                Specifications = computer.Specifications,
-                ImageUrl = computer.ImageUrl,
-                PurchaseDate = computer.PurchaseDate,
-                WarrantyExpirationDate = computer.WarrantyExpirationDate,
-                StatusId = computer.ComputerStatuses.LastOrDefault()?.ComputerStatusId ?? 0,
-                UserId = computer.Users.LastOrDefault(u => u.AssignEndDate != null)?.UserId
-            };
 
+            var responseDto = _mapper.Map<ComputerDto>(computer);
             return CreatedAtAction(nameof(GetById), new { id = computer.Id }, responseDto);
         }
 

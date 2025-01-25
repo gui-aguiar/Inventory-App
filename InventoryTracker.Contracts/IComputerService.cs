@@ -6,7 +6,7 @@ namespace InventoryTracker.Interfaces
 {
     public interface IComputerService
     {        
-        Task<IEnumerable<ComputerDto>> GetAllAsync(int offset, int limit);
+        Task<IEnumerable<Computer>> GetAllAsync(int offset, int limit);
         Task<Computer> GetByIdAsync(int id);
         Task<ComputerDto> GetDtoByIdAsync(int id);
         Task<int> GetTotalCountAsync();
