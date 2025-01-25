@@ -65,13 +65,7 @@ namespace InventoryTracker.Server.Controllers
         public async Task<IActionResult> Update(int id, [FromBody] SaveComputerDto computerDto)
         {
             var existingComputer = await _computerService.GetByIdAsync(id);
-
-            existingComputer.ComputerManufacturerId = computerDto.ManufacturerId;
-            existingComputer.SerialNumber = computerDto.SerialNumber;
-            existingComputer.Specifications = computerDto.Specifications;
-            existingComputer.ImageUrl = computerDto.ImageUrl;
-            existingComputer.PurchaseDate = computerDto.PurchaseDate;
-            existingComputer.WarrantyExpirationDate = computerDto.WarrantyExpirationDate;
+            _mapper.Map(computerDto, existingComputer);
 
             await _computerService.UpdateAsync(existingComputer);
             return NoContent();
