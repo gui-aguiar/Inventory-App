@@ -28,6 +28,9 @@ namespace InventoryTracker.Services
 
         public async Task<IEnumerable<ComputerDto>> GetAllAsync(int offset, int limit)
         {
+            if (offset < 0 || limit <= 0)
+                throw new ArgumentException("Offset must be >= 0 and limit must be > 0.");
+
             var computers = await _repository.GetAll()
                 .Include(c => c.Users)
                 .Include(c => c.ComputerStatuses)
@@ -236,6 +239,7 @@ namespace InventoryTracker.Services
                 FinalizeCurrentUserAssignment(computer);
             }
         }
+     
         private void FinalizeCurrentUserAssignment(Computer computer)
         {
             var currentAssignment = computer.Users.FirstOrDefault(u => u.AssignEndDate == null);

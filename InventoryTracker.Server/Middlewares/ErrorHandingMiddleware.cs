@@ -26,11 +26,13 @@ namespace InventoryTracker.Server.Middlewares
 
         private static Task HandleExceptionAsync(HttpContext context, Exception exception)
         {
-            var statusCode = HttpStatusCode.InternalServerError;
+            var statusCode = GetHttpStatusCode(exception);
+            var message = exception.Message;
+
             var result = JsonSerializer.Serialize(new
             {
                 statusCode = (int)statusCode,
-                message = exception.Message,
+                message,
                 error = exception.GetType().Name
             });
 
@@ -39,5 +41,16 @@ namespace InventoryTracker.Server.Middlewares
 
             return context.Response.WriteAsync(result);
         }
+
+        private static HttpStatusCode GetHttpStatusCode(Exception exception)
+        {
+            return exception switch
+            {
+                KeyNotFoundException => HttpStatusCode.NotFound,
+                ArgumentException => HttpStatusCode.BadRequest,
+                _ => HttpStatusCode.InternalServerError
+            };
+        }
+
     }
 }
