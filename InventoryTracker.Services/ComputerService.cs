@@ -141,28 +141,6 @@ namespace InventoryTracker.Services
             ValidateDates(computer);
         }
 
-        private async Task<Computer> GetComputerOrThrowAsync(int computerId)
-        {
-            var computer = await _repository.GetByIdAsync(computerId);
-            return computer ?? throw new ArgumentException($"Computer with ID '{computerId}' not found.");
-        }
-
-        private async Task EnsureUniqueSerialNumberAsync(string serialNumber)
-        {
-            if (await _repository.GetAll().AnyAsync(c => c.SerialNumber == serialNumber))
-            {
-                throw new ArgumentException($"Serial number '{serialNumber}' must be unique.");
-            }
-        }
-
-        private async Task EnsureValidManufacturerAsync(int manufacturerId)
-        {
-            if (await _manufacturerRepository.GetByIdAsync(manufacturerId) == null)
-            {
-                throw new ArgumentException($"Manufacturer ID '{manufacturerId}' is invalid.");
-            }
-        }
-
         private void ValidateRequiredFields(Computer computer)
         {
             if (string.IsNullOrWhiteSpace(computer.SerialNumber) ||
@@ -186,6 +164,22 @@ namespace InventoryTracker.Services
                 throw new ArgumentException($"Invalid serial number for manufacturer '{manufacturer.Name}'.");
             }
         }
+       
+        private async Task EnsureUniqueSerialNumberAsync(string serialNumber)
+        {
+            if (await _repository.GetAll().AnyAsync(c => c.SerialNumber == serialNumber))
+            {
+                throw new ArgumentException($"Serial number '{serialNumber}' must be unique.");
+            }
+        }
+
+        private async Task EnsureValidManufacturerAsync(int manufacturerId)
+        {
+            if (await _manufacturerRepository.GetByIdAsync(manufacturerId) == null)
+            {
+                throw new ArgumentException($"Manufacturer ID '{manufacturerId}' is invalid.");
+            }
+        }
 
         private void ValidateDates(Computer computer)
         {
@@ -198,6 +192,12 @@ namespace InventoryTracker.Services
             {
                 throw new ArgumentException("Warranty expiry date must be after the purchase date.");
             }
+        }
+
+        private async Task<Computer> GetComputerOrThrowAsync(int computerId)
+        {
+            var computer = await _repository.GetByIdAsync(computerId);
+            return computer ?? throw new ArgumentException($"Computer with ID '{computerId}' not found.");
         }
 
         private void ValidateStatusChange(Computer computer, int newStatusId)
