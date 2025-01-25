@@ -31,7 +31,7 @@ namespace InventoryTracker.Database.Configuration
             builder.HasOne(l => l.Status)
                 .WithMany(cs => cs.ComputerStatuses)
                 .HasForeignKey(l => l.ComputerStatusId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }
