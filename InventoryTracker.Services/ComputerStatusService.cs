@@ -25,6 +25,11 @@ namespace InventoryTracker.Services
 
         public void ValidateStatusTransition(Status currentStatus, Status newStatus)
         {
+            if (!Enum.IsDefined(typeof(Status), (int)newStatus))
+            {
+                throw new ArgumentException($"Status ID '{(int)newStatus}' does not exist.");
+            }
+
             if (currentStatus == (Status)newStatus)
             {
                 throw new InvalidOperationException($"The computer is already in the status '{currentStatus}'.");
@@ -57,6 +62,11 @@ namespace InventoryTracker.Services
 
         public void AssignNewStatus(Computer computer, int newStatusId)
         {
+            if (!Enum.IsDefined(typeof(Status), newStatusId))
+            {
+                throw new ArgumentException($"Status ID '{newStatusId}' does not exist.");
+            }
+
             computer.ComputerStatuses.Add(new LinkComputerStatus
             {
                 ComputerId = computer.Id,
