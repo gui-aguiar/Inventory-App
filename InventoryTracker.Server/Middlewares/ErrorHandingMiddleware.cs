@@ -51,6 +51,5 @@ namespace InventoryTracker.Server.Middlewares
                 _ => HttpStatusCode.InternalServerError
             };
         }
-
     }
 }
