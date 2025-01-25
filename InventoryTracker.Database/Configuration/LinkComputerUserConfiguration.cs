@@ -30,12 +30,12 @@ namespace InventoryTracker.Database.Configuration
             builder.HasOne(l => l.Computer)
                 .WithMany(c => c.Users)
                 .HasForeignKey(l => l.ComputerId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.Restrict);
 
             builder.HasOne(l => l.User)
                 .WithMany(u => u.ComputerUsers)
                 .HasForeignKey(l => l.UserId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }
