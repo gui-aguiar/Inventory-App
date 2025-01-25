@@ -1,5 +1,6 @@
 ﻿using InventoryTracker.Contracts;
 using InventoryTracker.Models;
+using InventoryTracker.Repositories;
 
 namespace InventoryTracker.Services
 {
@@ -12,10 +13,9 @@ namespace InventoryTracker.Services
             _userRepository = userRepository;
         }
 
-        public async Task<User> GetUserOrThrowAsync(int userId)
+        public async Task<User> GetUserByIdAsync(int userId)
         {
-            var user = await _userRepository.GetByIdAsync(userId);
-            return user ?? throw new ArgumentException($"User with ID '{userId}' not found.");
+            return await _userRepository.GetByIdAsync(userId) ?? throw new KeyNotFoundException($"User with ID '{userId}' not found.");
         }
 
         public void AssignNewUser(Computer computer, User user)

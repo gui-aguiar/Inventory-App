@@ -5,7 +5,7 @@ namespace InventoryTracker.Contracts
 {
     public interface IComputerUserService
     {
-        Task<User> GetUserOrThrowAsync(int userId);
+        Task<User> GetUserByIdAsync(int userId);
         void AssignNewUser(Computer computer, User user);
     }
 }

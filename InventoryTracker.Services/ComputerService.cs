@@ -104,11 +104,10 @@ namespace InventoryTracker.Services
             if (computer == null)
                 throw new KeyNotFoundException($"Computer with ID '{computerId}' not found.");
 
-            var user = await _userService.GetUserOrThrowAsync(userId);
+            var user = await _userService.GetUserByIdAsync(userId);
 
             FinalizeCurrentUserAssignment(computer);
             _userService.AssignNewUser(computer, user);
-
             _statusService.AssignNewStatus(computer, (int)Status.InUse);
 
             await _repository.UpdateAsync(computer);

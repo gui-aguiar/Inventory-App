@@ -110,28 +110,8 @@ namespace InventoryTracker.Server.Controllers
         [HttpPut("{computerId}/user")]
         public async Task<IActionResult> AssignUserToComputer(int computerId, [FromBody] ChangeUserDto changeUserDto)
         {
-            if (changeUserDto == null || changeUserDto.UserId <= 0)
-            {
-                return BadRequest("Invalid request payload.");
-            }
-
-            try
-            {
-                await _computerService.AssignUserAsync(computerId, changeUserDto.UserId);
-                return NoContent();
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(ex.Message);
-            }
-            catch (InvalidOperationException ex)
-            {
-                return Conflict(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, "An unexpected error occurred: " + ex.Message);
-            }
+            await _computerService.AssignUserAsync(computerId, changeUserDto.UserId);
+            return NoContent();
         }
 
         [HttpDelete("{computerId}/user")]

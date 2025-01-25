@@ -48,7 +48,7 @@ namespace InventoryTracker.Server.Middlewares
             {
                 KeyNotFoundException => HttpStatusCode.NotFound,
                 ArgumentException => HttpStatusCode.BadRequest,
-                InvalidOperationException => HttpStatusCode.BadRequest,
+                InvalidOperationException => HttpStatusCode.BadRequest,  // conflict?
                 _ => HttpStatusCode.InternalServerError
             };
         }
