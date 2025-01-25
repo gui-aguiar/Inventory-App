@@ -105,11 +105,11 @@ namespace InventoryTracker.Server.Controllers
         }
 
         [HttpPut("{id}/change-status")]
-        public async Task<IActionResult> ChangeStatus(int id, [FromBody] ChangeStatusRequest request)
+        public async Task<IActionResult> ChangeStatus(int id, [FromBody] ChangeStatusDto statusDto)
         {
             try
             {
-                await _computerService.ChangeStatusAsync(id, request.StatusId);
+                await _computerService.ChangeStatusAsync(id, statusDto.StatusId);
                 return NoContent();
             }
 
@@ -124,25 +124,25 @@ namespace InventoryTracker.Server.Controllers
         }
 
         [HttpPut("{computerId}/user")]
-        public async Task<IActionResult> AssignUserToComputer(int computerId, [FromBody] AssignUserRequest request)
+        public async Task<IActionResult> AssignUserToComputer(int computerId, [FromBody] ChangeUserDto changeUserDto)
         {
-            if (request == null || request.UserId <= 0)
+            if (changeUserDto == null || changeUserDto.UserId <= 0)
             {
                 return BadRequest("Invalid request payload.");
             }
 
             try
             {
-                await _computerService.AssignUserAsync(computerId, request.UserId);
-                return NoContent(); // Indicating the action was successful
+                await _computerService.AssignUserAsync(computerId, changeUserDto.UserId);
+                return NoContent();
             }
             catch (ArgumentException ex)
             {
-                return BadRequest(ex.Message); // For invalid inputs
+                return BadRequest(ex.Message);
             }
             catch (InvalidOperationException ex)
             {
-                return Conflict(ex.Message); // For logical inconsistencies
+                return Conflict(ex.Message);
             }
             catch (Exception ex)
             {
@@ -171,14 +171,5 @@ namespace InventoryTracker.Server.Controllers
                 return StatusCode(500, "An unexpected error occurred: " + ex.Message);
             }
         }
-    }
-    public class ChangeStatusRequest  // Dto
-    {
-        public int StatusId { get; set; }
-    }
-
-    public class AssignUserRequest  // Dto
-    {
-        public int UserId { get; set; }
     }
 }
