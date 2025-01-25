@@ -48,6 +48,7 @@ namespace InventoryTracker.Services
                 WarrantyExpirationDate = c.WarrantyExpirationDate
             });
         }
+        
         public async Task AddAsync(Computer computer)
         {
             await ValidateComputerAsync(computer);            

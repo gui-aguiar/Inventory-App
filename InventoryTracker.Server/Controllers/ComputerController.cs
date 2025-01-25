@@ -19,24 +19,40 @@ namespace InventoryTracker.Server.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAll([FromQuery] int offset = 0, [FromQuery] int limit = 10)
         {
-            var totalItems = await _computerService.GetTotalCountAsync();
-            var computers = await _computerService.GetAllAsync(offset, limit);
-
-            var paginationMetadata = new PaginationMetadata
+            if (offset < 0 || limit <= 0)
             {
-                TotalItems = totalItems,
-                PageSize = limit,
-                CurrentPage = (offset / limit) + 1,
-                TotalPages = (int)Math.Ceiling(totalItems / (double)limit)
-            };
+                return BadRequest(new
+                {
+                    statusCode = 400,
+                    message = "Offset must be >= 0 and limit must be > 0."
+                });
+            }
 
-            var response = new PagedResponse<ComputerDto>
+            try
             {
-                Data = computers,
-                Pagination = paginationMetadata
-            };
 
-            return Ok(response);
+                var totalItems = await _computerService.GetTotalCountAsync();
+                var computers = await _computerService.GetAllAsync(offset, limit);
+
+                var paginationMetadata = new PaginationMetadata
+                {
+                    TotalItems = totalItems,
+                    PageSize = limit,
+                    CurrentPage = (offset / limit) + 1,
+                    TotalPages = (int)Math.Ceiling(totalItems / (double)limit)
+                };
+
+                var response = new PagedResponse<ComputerDto>
+                {
+                    Data = computers,
+                    Pagination = paginationMetadata
+                };
+
+                return Ok(response);
+            }
+            catch (Exception) {
+                throw;
+            }
         }
 
         [HttpGet("{id}")]

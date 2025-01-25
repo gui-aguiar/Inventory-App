@@ -1,5 +1,6 @@
 using InventoryTracker.Database;
 using InventoryTracker.DependencyInjection;
+using InventoryTracker.Server.Middlewares;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 
@@ -15,7 +16,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 var connection = new SqliteConnection("DataSource=:memory:");
-connection.Open(); // Abre a conexão
+connection.Open();
 
 builder.Services.AddDbContext<InventoryTrackerDBContext>(options =>
     options.UseSqlite(connection)); // Registra o contexto com a conexão compartilhada
@@ -29,6 +30,7 @@ builder.Services.AddServices();
 var app = builder.Build();
 app.Urls.Add($"http://*:{port}");
 
+app.UseMiddleware<ErrorHandlerMiddleware>();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -40,25 +42,16 @@ if (app.Environment.IsDevelopment())
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<InventoryTrackerDBContext>();
-    dbContext.Database.EnsureCreated();  // Cria o banco
+    dbContext.Database.EnsureCreated();
 
-    // Lê o conteúdo do arquivo SQL
     var scriptPath = "D:\\GitHubRepos\\VelozientApp\\DatabaseDocker\\populate-database.sql";
     var sqlScript = File.ReadAllText(scriptPath);
-
-
-    // Divide o script em comandos SQL, caso esteja separado por `;`
-    // 3. Dividir e executar cada comando no script SQL
     using var command = connection.CreateCommand();
     foreach (var sql in sqlScript.Split(";", StringSplitOptions.RemoveEmptyEntries))
     {
         command.CommandText = sql;
-        command.ExecuteNonQuery(); // Executa cada comando no SQLite
+        command.ExecuteNonQuery();
     }
-
-
-    // Executa o script SQL
- //   dbContext.Database.ExecuteSqlRaw(sqlScript);
 }
 
 app.UseHttpsRedirection();

@@ -15,7 +15,6 @@ namespace InventoryTracker.Interfaces
         Task DeleteAsync(int id);
         Task AssignUserAsync(int computerId, int userId);
         Task UnassignUserAsync(int computerId);
-
         Task ChangeStatusAsync(int computerId, int newStatusId);
 
     }
