@@ -67,7 +67,7 @@ namespace InventoryTracker.Services
 
         public async Task DeleteAsync(int id)
         {
-            var computer = await _repository.GetByIdAsync(id);
+            var computer = await GetByIdAsync(id);
             await _repository.DeleteAsync(computer);
         }
 
@@ -80,7 +80,6 @@ namespace InventoryTracker.Services
 
             if (computer == null)
                 throw new KeyNotFoundException($"Computer with ID '{computerId}' not found.");
-
 
             ValidateStatusChange(computer, newStatusId);
             UnassignUserIfNeeded(computer, newStatusId);
@@ -208,7 +207,7 @@ namespace InventoryTracker.Services
                 throw new InvalidOperationException($"The computer is already in the status '{currentStatus}'.");
             }
             
-            if (currentStatus == Status.Retired) // sem esse nao dava erro la na outra validacao 
+            if (currentStatus == Status.Retired)
             {
                 throw new InvalidOperationException("Computer has been retired.");
             }
