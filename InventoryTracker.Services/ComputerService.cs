@@ -59,6 +59,11 @@ namespace InventoryTracker.Services
             await _repository.AddAsync(computer);
         }
 
+        public async Task<Computer> GetByIdAsync(int id)
+        {
+            return await _repository.GetByIdAsync(id) ?? throw new KeyNotFoundException($"Computer with ID '{id}' not found.");
+        }
+
         public async Task UpdateAsync(Computer computer)
         {                  
             await ValidateComputerAsync(computer);            
@@ -132,6 +137,35 @@ namespace InventoryTracker.Services
             _statusService.AssignNewStatus(computer, (int)Status.Available);
 
             await _repository.UpdateAsync(computer);
+        }
+
+        public async Task<ComputerDto> GetDtoByIdAsync(int id)
+        {
+            var computer = await _repository.GetAll()
+                .Include(c => c.Users)
+                .Include(c => c.ComputerStatuses)
+                .FirstOrDefaultAsync(c => c.Id == id);
+
+            if (computer == null)
+                throw new KeyNotFoundException($"Computer with ID '{id}' not found.");
+
+            return new ComputerDto
+            {
+                Id = computer.Id,
+                ManufacturerId = computer.ComputerManufacturerId,
+                SerialNumber = computer.SerialNumber,
+                StatusId = computer.ComputerStatuses.OrderBy(cs => cs.AssignDate).LastOrDefault()?.ComputerStatusId ?? 0,
+                UserId = computer.Users.LastOrDefault(u => u.AssignEndDate == null)?.UserId,
+                Specifications = computer.Specifications,
+                ImageUrl = computer.ImageUrl,
+                PurchaseDate = computer.PurchaseDate,
+                WarrantyExpirationDate = computer.WarrantyExpirationDate
+            };
+        }
+
+        public async Task<int> GetTotalCountAsync()
+        {
+            return await _repository.GetAll().CountAsync();
         }
 
         // ----------- Private Helper Methods -----------
@@ -230,41 +264,6 @@ namespace InventoryTracker.Services
             {
                 currentAssignment.AssignEndDate = DateTime.UtcNow;
             }
-        }  // user servce?
-
-        public async Task<ComputerDto> GetDtoByIdAsync(int id)
-        {
-            var computer = await _repository.GetAll()
-                .Include(c => c.Users)
-                .Include(c => c.ComputerStatuses)
-                .FirstOrDefaultAsync(c => c.Id == id);
-
-            if (computer == null)
-                throw new KeyNotFoundException($"Computer with ID '{id}' not found.");
-
-            return new ComputerDto
-            {
-                Id = computer.Id,
-                ManufacturerId = computer.ComputerManufacturerId,
-                SerialNumber = computer.SerialNumber,
-                StatusId = computer.ComputerStatuses.OrderBy(cs => cs.AssignDate).LastOrDefault()?.ComputerStatusId ?? 0,
-                UserId = computer.Users.LastOrDefault(u => u.AssignEndDate == null)?.UserId,
-                Specifications = computer.Specifications,
-                ImageUrl = computer.ImageUrl,
-                PurchaseDate = computer.PurchaseDate,
-                WarrantyExpirationDate = computer.WarrantyExpirationDate
-            };
         }
-
-        public async Task<Computer> GetByIdAsync(int id)
-        {
-            return await _repository.GetByIdAsync(id) ?? throw new KeyNotFoundException($"Computer with ID '{id}' not found.");
-        }
-
-        public async Task<int> GetTotalCountAsync()
-        {
-            return await _repository.GetAll().CountAsync();
-        }
-
     }
 }

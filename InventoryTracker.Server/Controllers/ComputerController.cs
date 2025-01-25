@@ -117,23 +117,8 @@ namespace InventoryTracker.Server.Controllers
         [HttpDelete("{computerId}/user")]
         public async Task<IActionResult> UnassignUserToComputer(int computerId)
         {
-            try
-            {
-                await _computerService.UnassignUserAsync(computerId);
-                return NoContent();
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(ex.Message);
-            }
-            catch (InvalidOperationException ex)
-            {
-                return Conflict(ex.Message); // For logical inconsistencies
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, "An unexpected error occurred: " + ex.Message);
-            }
+            await _computerService.UnassignUserAsync(computerId);
+            return NoContent();          
         }
     }
 }
