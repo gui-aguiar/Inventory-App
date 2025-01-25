@@ -60,9 +60,15 @@ namespace InventoryTracker.Services
         }
 
         public async Task UpdateAsync(Computer computer)
-        {   
+        {                  
             await ValidateComputerAsync(computer);            
             await _repository.UpdateAsync(computer);
+        }
+
+        public async Task DeleteAsync(int id)
+        {
+            var computer = await _repository.GetByIdAsync(id);
+            await _repository.DeleteAsync(computer);
         }
 
         public async Task ChangeStatusAsync(int computerId, int newStatusId)
@@ -193,12 +199,6 @@ namespace InventoryTracker.Services
             }
         }
 
-        private async Task<Computer> GetComputerOrThrowAsync(int computerId)
-        {
-            var computer = await _repository.GetByIdAsync(computerId);
-            return computer ?? throw new ArgumentException($"Computer with ID '{computerId}' not found.");
-        }
-
         private void ValidateStatusChange(Computer computer, int newStatusId)
         {
             var currentStatus = _statusService.GetCurrentStatusAsync(computer).Result;
@@ -274,7 +274,7 @@ namespace InventoryTracker.Services
 
         public async Task<Computer> GetByIdAsync(int id)
         {
-            return await _repository.GetByIdAsync(id);
+            return await _repository.GetByIdAsync(id) ?? throw new KeyNotFoundException($"Computer with ID '{id}' not found.");
         }
 
         public async Task<int> GetTotalCountAsync()
@@ -282,13 +282,5 @@ namespace InventoryTracker.Services
             return await _repository.GetAll().CountAsync();
         }
 
-        public async Task DeleteAsync(int id)
-        {
-            var computer = await _repository.GetByIdAsync(id);
-            if (computer == null)
-                throw new KeyNotFoundException($"Computer not found");
-
-            await _repository.DeleteAsync(computer);
-        }
     }
 }
