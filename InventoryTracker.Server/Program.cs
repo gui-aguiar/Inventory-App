@@ -11,19 +11,14 @@ builder.Configuration.AddEnvironmentVariables();
 var dbPath = Environment.GetEnvironmentVariable("DB_PATH") ?? "D:/data/inventory.db";
 var port = Environment.GetEnvironmentVariable("APP_PORT") ?? "5019";
 
-SqliteConnection connection;
-if (builder.Environment.IsDevelopment())
-{
-    connection = new SqliteConnection("DataSource=:memory:");
-    connection.Open();
-}
-else
-{   
-    connection = new SqliteConnection($"DataSource={dbPath}");
-}
-
 builder.Services.AddDbContext<InventoryTrackerDBContext>(options =>
-    options.UseSqlite(connection));
+{
+    var connectionString = builder.Environment.IsDevelopment()
+        ? "DataSource=:memory:;Pooling=False"
+        : $"DataSource={dbPath};Pooling=False";
+
+    options.UseSqlite(connectionString);
+}, ServiceLifetime.Scoped);
 
 var allowedOrigins = "AllowedOrigins";
 builder.Services.AddCors(options =>
@@ -61,11 +56,15 @@ using (var scope = app.Services.CreateScope())
     {
         var scriptPath = "..\\DatabaseDocker\\populate-database.sql";
         var sqlScript = File.ReadAllText(scriptPath);
-        using var command = connection.CreateCommand();
+        /*using var command = connection.CreateCommand();
         foreach (var sql in sqlScript.Split(";", StringSplitOptions.RemoveEmptyEntries))
         {
             command.CommandText = sql;
             command.ExecuteNonQuery();
+        }*/
+        foreach (var sql in sqlScript.Split(";", StringSplitOptions.RemoveEmptyEntries))
+        {
+            dbContext.Database.ExecuteSqlRaw(sql);
         }
     }
 }
