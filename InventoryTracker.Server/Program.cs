@@ -25,6 +25,17 @@ else
 builder.Services.AddDbContext<InventoryTrackerDBContext>(options =>
     options.UseSqlite(connection));
 
+var allowedOrigins = "AllowedOrigins";
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(name: allowedOrigins, policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyHeader()                   
+              .AllowAnyMethod();                  
+    });
+});
+
 builder.Services.AddControllers();
 builder.Services.AddAutoMapper(typeof(MappingProfile));
 builder.Services.AddEndpointsApiExplorer();
@@ -36,8 +47,8 @@ var app = builder.Build();
 app.Urls.Add($"http://*:{port}");
 
 app.UseMiddleware<ErrorHandlerMiddleware>();
+app.UseCors(allowedOrigins);
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();

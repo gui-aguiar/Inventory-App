@@ -16,15 +16,18 @@ namespace InventoryTracker.Server.Controllers
             _userRepository = userRepository;
         }
 
-        /// <summary>
-        /// Get all users
-        /// </summary>
-        /// <returns>List of users</returns>
         [HttpGet]
         public async Task<IActionResult> Get()
         {
             var users = await _userRepository.GetAll().ToListAsync();
             return Ok(users);
+        }
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetUserById(int id)
+        {
+            var user = await _repository.GetByIdAsync(id);
+            return Ok(user);
         }
     }
 }
