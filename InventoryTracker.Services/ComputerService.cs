@@ -47,26 +47,22 @@ namespace InventoryTracker.Services
             return (data, metadata);
         }
 
-        public async Task AddAsync(Computer computer)
+        public async Task<ComputerDto> AddAsync(SaveComputerDto computerDto)
         {
-            await ValidateComputerAsync(computer);            
-            _statusService.AssignNewStatus(computer, (int)Status.New);
-            await _repository.AddAsync(computer);
+            var computer = _mapper.Map<Computer>(computerDto);
+            await AddComputerAsync(computer);
+            return _mapper.Map<ComputerDto>(computer);
         }
-
-        private async Task<Computer> GetByIdAsync(int id)
+        
+        public async Task<ComputerDto> GetByIdAsync(int id)
         {
-            var computer = await _repository.GetAll()
-                .Include(c => c.Users)
-                .Include(c => c.ComputerStatuses)
-                .FirstOrDefaultAsync(c => c.Id == id);
-
-            return computer ?? throw new KeyNotFoundException($"Computer with ID '{id}' not found.");
+            var computer = await GetComputerByIdAsync(id);
+            return _mapper.Map<ComputerDto>(computer);
         }
 
         public async Task UpdateAsync(int id, SaveComputerDto computerDto)
         {
-            var existingComputer = await GetByIdAsync(id);
+            var existingComputer = await GetComputerByIdAsync(id);
             _mapper.Map(computerDto, existingComputer);
 
             await ValidateComputerAsync(existingComputer);            
@@ -75,19 +71,13 @@ namespace InventoryTracker.Services
 
         public async Task DeleteAsync(int id)
         {
-            var computer = await GetByIdAsync(id);
+            var computer = await GetComputerByIdAsync(id);
             await _repository.DeleteAsync(computer);
         }
 
         public async Task ChangeStatusAsync(int computerId, int newStatusId)
         {
-            var computer = await _repository.GetAll()
-                .Include(c => c.ComputerStatuses)
-                .Include(c => c.Users)
-                .FirstOrDefaultAsync(c => c.Id == computerId);
-
-            if (computer == null)
-                throw new KeyNotFoundException($"Computer with ID '{computerId}' not found.");
+            var computer = await GetComputerByIdAsync(computerId);
 
             var currentStatus = _statusService.GetCurrentStatusAsync(computer).Result;
 
@@ -104,17 +94,14 @@ namespace InventoryTracker.Services
 
         public async Task AssignUserAsync(int computerId, int userId)
         {
-            var computer = await _repository.GetAll()
-                .Include(c => c.ComputerStatuses)
-                .Include(c => c.Users)
-                .FirstOrDefaultAsync(c => c.Id == computerId);
-    
-            if (computer == null)
-                throw new KeyNotFoundException($"Computer with ID '{computerId}' not found.");
+            var computer = await GetComputerByIdAsync(computerId);
 
             var user = await _userService.GetUserByIdAsync(userId);
-
             FinalizeCurrentUserAssignment(computer);
+
+            var currentStatus = _statusService.GetCurrentStatusAsync(computer).Result;
+            _statusService.ValidateStatusTransition(currentStatus, Status.InUse);
+
             _userService.AssignNewUser(computer, user);
             _statusService.AssignNewStatus(computer, (int)Status.InUse);
 
@@ -123,13 +110,7 @@ namespace InventoryTracker.Services
 
         public async Task UnassignUserAsync(int computerId)
         {
-            var computer = await _repository.GetAll()
-                .Include(c => c.Users)
-                .Include(c => c.ComputerStatuses)
-                .FirstOrDefaultAsync(c => c.Id == computerId);
-
-            if (computer == null)
-                throw new KeyNotFoundException($"Computer with ID '{computerId}' not found.");
+            var computer = await GetComputerByIdAsync(computerId);
 
             var currentAssignment = computer.Users.FirstOrDefault(u => u.AssignEndDate == null);
             if (currentAssignment == null)
@@ -142,12 +123,23 @@ namespace InventoryTracker.Services
             await _repository.UpdateAsync(computer);
         }
 
-        public async Task<ComputerDto> GetDtoByIdAsync(int id)
+        private async Task AddComputerAsync(Computer computer)
         {
-            var computer = await GetByIdAsync(id);
-            return _mapper.Map<ComputerDto>(computer);            
+            await ValidateComputerAsync(computer);
+            _statusService.AssignNewStatus(computer, (int)Status.New);
+            await _repository.AddAsync(computer);
         }
 
+        private async Task<Computer> GetComputerByIdAsync(int id)
+        {
+            var computer = await _repository.GetAll()
+                .Include(c => c.Users)
+                .Include(c => c.ComputerStatuses)
+                .FirstOrDefaultAsync(c => c.Id == id);
+
+            return computer ?? throw new KeyNotFoundException($"Computer with ID '{id}' not found.");
+        }
+        
         private async Task ValidateComputerAsync(Computer computer)
         {
             ValidateRequiredFields(computer);
@@ -242,13 +234,6 @@ namespace InventoryTracker.Services
             {
                 currentAssignment.AssignEndDate = DateTime.UtcNow;
             }
-        }
-
-        public async Task<ComputerDto> AddAndReturnDtoAsync(SaveComputerDto computerDto)
-        {
-            var computer = _mapper.Map<Computer>(computerDto);
-            await AddAsync(computer);
-            return _mapper.Map<ComputerDto>(computer);
         }
     }
 }

@@ -10,7 +10,6 @@ namespace InventoryTracker.Contracts
     {
         Task<T?> GetByIdAsync(int id);
         IQueryable<T> GetAll();
-        IQueryable<T> Find(Expression<Func<T, bool>> predicate);
         Task AddAsync(T entity);
         Task UpdateAsync(T entity);
         Task DeleteAsync(T entity);

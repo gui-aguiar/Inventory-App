@@ -29,14 +29,14 @@ namespace InventoryTracker.Server.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
-            var computerDto = await _computerService.GetDtoByIdAsync(id);            
+            var computerDto = await _computerService.GetByIdAsync(id);            
             return Ok(computerDto);
         }
 
         [HttpPost]
         public async Task<IActionResult> Add([FromBody] SaveComputerDto computerDto)
         {
-            var responseDto = await _computerService.AddAndReturnDtoAsync(computerDto);
+            var responseDto = await _computerService.AddAsync(computerDto);
             return CreatedAtAction(nameof(GetById), new { id = responseDto.Id }, responseDto);
         }
 

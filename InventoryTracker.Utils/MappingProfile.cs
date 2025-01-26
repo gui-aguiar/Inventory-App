@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using InventoryTracker.Dtos;
 using InventoryTracker.Models;
+using System.Xml.Serialization;
 
 namespace InventoryTracker.Utils
 {
@@ -9,10 +10,12 @@ namespace InventoryTracker.Utils
         public MappingProfile()
         {
             // Mapeia SaveComputerDto -> Computer (para criação/atualização)
-            CreateMap<SaveComputerDto, Computer>();
+            CreateMap<SaveComputerDto, Computer>()
+                .ForMember(dest => dest.ComputerManufacturerId, opt => opt.MapFrom(src => src.ManufacturerId));
 
             // Mapeia Computer -> ComputerDto (para leitura)
             CreateMap<Computer, ComputerDto>()
+                .ForMember(dest => dest.ManufacturerId, opt => opt.MapFrom(src => src.ComputerManufacturerId))
                 .ForMember(dest => dest.StatusId, opt => opt.MapFrom(src =>
                         src.ComputerStatuses != null && src.ComputerStatuses.Any()
                             ? src.ComputerStatuses.OrderBy(cs => cs.AssignDate).Last().ComputerStatusId

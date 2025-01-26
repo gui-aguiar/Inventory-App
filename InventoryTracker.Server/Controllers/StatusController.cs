@@ -22,5 +22,12 @@ namespace InventoryTracker.Server.Controllers
             var statuses = await _repository.GetAll().ToListAsync();
             return Ok(statuses);
         }
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetStatusById(int id)
+        {
+            var manufacturer = await _repository.GetByIdAsync(id);
+            return Ok(manufacturer);
+        }
     }
 }

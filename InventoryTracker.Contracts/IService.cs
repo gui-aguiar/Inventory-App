@@ -7,9 +7,5 @@ namespace InventoryTracker.Contracts
     {
         Task<IEnumerable<T>> GetAllAsync(int offset, int limit);
         Task<T?> GetByIdAsync(int id);
-        Task<int> GetTotalCountAsync();
-        Task AddAsync(T entity);
-        Task UpdateAsync(T entity);
-        Task DeleteAsync(int id);
     }
 }
