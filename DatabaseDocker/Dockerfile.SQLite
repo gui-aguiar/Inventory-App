@@ -1,15 +1,21 @@
-FROM alpine:3.17
+# Use a minimal base image
+FROM alpine:latest
 
+# Define the working directory inside the container
+WORKDIR /data
+
+# Install SQLite
 RUN apk add --no-cache sqlite
 
-RUN mkdir -p /data /scripts
+# Copy the SQL scripts to the container
+COPY *.sql /data/
 
-WORKDIR /scripts
+# Initialize the SQLite database by running the scripts
+RUN sqlite3 inventory.db < /data/01_create_tables.sql && \
+    sqlite3 inventory.db < /data/02_insert_data.sql
 
-COPY create-database.sql populate-database.sql ./
+# Set a volume to persist the database file
+VOLUME ["/data"]
 
-VOLUME /data
-
-CMD ["sh", "-c", "sqlite3 /data/inventory.db '.read /scripts/create-database.sql' && \
-                   sqlite3 /data/inventory.db '.read /scripts/populate-database.sql' && \
-                   tail -f /dev/null"]
+# Default command to keep the container running
+CMD ["tail", "-f", "/dev/null"]
