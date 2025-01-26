@@ -15,8 +15,7 @@
     <ProjectReference Include="..\InventoryTracker.Contracts\InventoryTracker.Contracts.csproj" />
     <ProjectReference Include="..\InventoryTracker.Database\InventoryTracker.Database.csproj" />
     <ProjectReference Include="..\InventoryTracker.DependencyInjection\InventoryTracker.DependencyInjection.csproj" />
-    <ProjectReference Include="..\InventoryTracker.Dtos\InventoryTracker.Dtos.csproj" />
-    <ProjectReference Include="..\VelozientApp.Database\InventoryTracker.Database.csproj" />
+    <ProjectReference Include="..\InventoryTracker.Dtos\InventoryTracker.Dtos.csproj" />    
   </ItemGroup>
 
 </Project>

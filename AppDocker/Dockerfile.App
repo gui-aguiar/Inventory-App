@@ -17,7 +17,7 @@ RUN dotnet publish "VelozientApp.sln" -c Release -o /app
 # Etapa de runtime
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
 WORKDIR /app
-COPY --from=build /app/publish .
+COPY --from=build /app .
 
 ENV APP_PORT=5019
 EXPOSE ${APP_PORT}
