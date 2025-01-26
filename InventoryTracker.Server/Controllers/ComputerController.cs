@@ -12,7 +12,7 @@ namespace InventoryTracker.Server.Controllers
     {
         private readonly IComputerService _computerService;
 
-        public ComputerController(IComputerService computerService, IMapper mapper)
+        public ComputerController(IComputerService computerService)
         {
             _computerService = computerService;
         }
