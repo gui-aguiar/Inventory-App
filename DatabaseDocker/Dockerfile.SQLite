@@ -11,8 +11,8 @@ RUN apk add --no-cache sqlite
 COPY *.sql /data/
 
 # Initialize the SQLite database by running the scripts
-RUN sqlite3 inventory.db < /data/01_create_tables.sql && \
-    sqlite3 inventory.db < /data/02_insert_data.sql
+RUN sqlite3 inventory.db < /data/create-database.sql && \
+    sqlite3 inventory.db < /data/populate-database.sql
 
 # Set a volume to persist the database file
 VOLUME ["/data"]

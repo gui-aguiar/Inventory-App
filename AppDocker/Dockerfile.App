@@ -5,14 +5,14 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
 # Copia o arquivo de solução e os projetos
-COPY *.csproj ./
+COPY . ./
 
 # Restaura as dependências
-RUN dotnet restore
+RUN dotnet restore "VelozientApp.sln"
 
 # Copia o restante dos arquivos e publica o aplicativo
 COPY . ./
-RUN dotnet publish -c Release -o /app
+RUN dotnet publish "VelozientApp.sln" -c Release -o /app
 
 # Etapa de runtime
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
