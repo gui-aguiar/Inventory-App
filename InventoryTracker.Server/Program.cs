@@ -49,11 +49,8 @@ app.Urls.Add($"http://*:{port}");
 app.UseMiddleware<ErrorHandlerMiddleware>();
 app.UseCors(allowedOrigins);
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+app.UseSwagger();
+app.UseSwaggerUI();
 
 using (var scope = app.Services.CreateScope())
 {

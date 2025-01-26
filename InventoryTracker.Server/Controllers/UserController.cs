@@ -26,7 +26,7 @@ namespace InventoryTracker.Server.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetUserById(int id)
         {
-            var user = await _repository.GetByIdAsync(id);
+            var user = await _userRepository.GetByIdAsync(id);
             return Ok(user);
         }
     }
