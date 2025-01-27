@@ -2,10 +2,10 @@ services:
   database:
     build:
       context: ./DatabaseDocker
-      dockerfile: Dockerfile.SQLite
+      dockerfile: Dockerfile.SQLites
     container_name: inventory-db
     volumes:
-      - db_data:/data   # Banco persistente interno ao container
+      - db_data:/data
     networks:
       - app-network
     environment:
@@ -19,17 +19,17 @@ services:
     depends_on:
       - database
     ports:
-      - "${APP_PORT}:5019"  # Porta configuravel no .env
+      - "${APP_PORT}:5019"
     environment:
-      - APP_PORT=${APP_PORT}  # Porta configuravel via .env
-      - DB_PATH=/data/inventory.db  # Caminho do banco configurado no container
+      - APP_PORT=${APP_PORT}
+      - DB_PATH=/data/inventory.db
     volumes:
-      - db_data:/data   # Compartilha o volume com o banco
+      - db_data:/data 
     networks:
       - app-network
 
 volumes:
-  db_data:  # Volume para persistir o banco de dados
+  db_data:
 
 networks:
   app-network:
