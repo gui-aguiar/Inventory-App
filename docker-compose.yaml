@@ -2,7 +2,7 @@ services:
   database:
     build:
       context: ./DatabaseDocker
-      dockerfile: Dockerfile.SQLites
+      dockerfile: Dockerfile.SQLite
     container_name: inventory-db
     volumes:
       - db_data:/data
