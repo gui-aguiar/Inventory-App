@@ -1,6 +1,5 @@
 ﻿using InventoryTracker.Contracts;
 using InventoryTracker.Models;
-using InventoryTracker.Repositories;
 
 namespace InventoryTracker.Services
 {

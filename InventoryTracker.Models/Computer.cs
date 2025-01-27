@@ -1,8 +1,5 @@
 ﻿namespace InventoryTracker.Models
 {
-    /// <summary>
-    /// Represents a computer
-    /// </summary>
     public class Computer
     {
         public int Id { get; set; }

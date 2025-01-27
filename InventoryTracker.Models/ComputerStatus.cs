@@ -2,9 +2,6 @@
 
 namespace InventoryTracker.Models
 {
-    /// <summary>
-    /// Represents a computer status
-    /// </summary>
     public class ComputerStatus
     {
         public int Id { get; set; }

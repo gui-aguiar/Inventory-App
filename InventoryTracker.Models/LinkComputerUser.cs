@@ -1,8 +1,5 @@
 ﻿namespace InventoryTracker.Models
 {
-    /// <summary>
-    /// Represents the relationship between a computer and a user
-    /// </summary>
     public class LinkComputerUser
     {
         public int Id { get; set; }

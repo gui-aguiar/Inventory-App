@@ -1,5 +1,4 @@
-﻿using InventoryTracker.Contracts;
-using InventoryTracker.Dtos;
+﻿using InventoryTracker.Dtos;
 using InventoryTracker.Models;
 
 namespace InventoryTracker.Interfaces

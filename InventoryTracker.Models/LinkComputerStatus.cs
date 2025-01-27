@@ -1,8 +1,5 @@
 ﻿namespace InventoryTracker.Models
 {
-    /// <summary>
-    /// Represents the relationship between a computer and its status
-    /// </summary>
     public class LinkComputerStatus
     {
         public int Id { get; set; }

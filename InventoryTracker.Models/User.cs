@@ -2,9 +2,6 @@
 
 namespace InventoryTracker.Models
 {
-    /// <summary>
-    /// Represents a user
-    /// </summary>
     public class User
     {
         public int Id { get; set; }

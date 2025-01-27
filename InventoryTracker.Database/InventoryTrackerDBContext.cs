@@ -20,10 +20,8 @@ namespace InventoryTracker.Database
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // Define o schema padrão (se necessário)
-            modelBuilder.HasDefaultSchema("Inventory");  // isso aqui nao sei se precisa 
+            modelBuilder.HasDefaultSchema("Inventory");
 
-            // Aplica as configurações de cada entidade
             modelBuilder.ApplyConfiguration(new ComputerManufacturerConfiguration());
             modelBuilder.ApplyConfiguration(new ComputerConfiguration());
             modelBuilder.ApplyConfiguration(new ComputerStatusConfiguration());

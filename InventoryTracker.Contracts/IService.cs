@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-
-namespace InventoryTracker.Contracts
+﻿namespace InventoryTracker.Contracts
 {
     public interface IService<T> where T : class
     {
