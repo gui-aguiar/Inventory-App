@@ -1,4 +1,6 @@
-﻿namespace InventoryTracker.Models
+﻿using System.Text.Json.Serialization;
+
+namespace InventoryTracker.Models
 {
     /// <summary>
     /// Represents a user
@@ -10,8 +12,8 @@
         public string LastName { get; set; } = string.Empty;
         public string EmailAddress { get; set; } = string.Empty;
         public DateTime CreateDate { get; set; }
-
-        // Relacionamentos
+        
+        [JsonIgnore]
         public ICollection<LinkComputerUser> ComputerUsers { get; set; } = new List<LinkComputerUser>();
     }
 }

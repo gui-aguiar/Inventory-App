@@ -50,6 +50,7 @@ namespace InventoryTracker.Services
         public async Task<ComputerDto> AddAsync(SaveComputerDto computerDto)
         {
             var computer = _mapper.Map<Computer>(computerDto);
+            await EnsureUniqueSerialNumberAsync(computerDto.SerialNumber);
             await AddComputerAsync(computer);
             return _mapper.Map<ComputerDto>(computer);
         }
@@ -57,15 +58,17 @@ namespace InventoryTracker.Services
         public async Task<ComputerDto> GetByIdAsync(int id)
         {
             var computer = await GetComputerByIdAsync(id);
-            return _mapper.Map<ComputerDto>(computer);
+            return _mapper.Map<ComputerDto>(computer);            
         }
 
         public async Task UpdateAsync(int id, SaveComputerDto computerDto)
         {
             var existingComputer = await GetComputerByIdAsync(id);
-            _mapper.Map(computerDto, existingComputer);
+            await ValidateComputerAsync(existingComputer);
+            if (existingComputer != null && existingComputer.SerialNumber != computerDto.SerialNumber)
+                await EnsureUniqueSerialNumberAsync(computerDto.SerialNumber);
 
-            await ValidateComputerAsync(existingComputer);            
+            _mapper.Map(computerDto, existingComputer);            
             await _repository.UpdateAsync(existingComputer);
         }
 
@@ -143,12 +146,7 @@ namespace InventoryTracker.Services
         private async Task ValidateComputerAsync(Computer computer)
         {
             ValidateRequiredFields(computer);
-            ValidateSerialNumberFormat(computer);
-
-            var existingComputer = await _repository.GetByIdAsync(computer.Id);
-            if (existingComputer != null && existingComputer.SerialNumber != computer.SerialNumber)            
-                await EnsureUniqueSerialNumberAsync(computer.SerialNumber);
-            
+            ValidateSerialNumberFormat(computer);           
             await EnsureValidManufacturerAsync(computer.ComputerManufacturerId);            
             ValidateDates(computer);
         }
